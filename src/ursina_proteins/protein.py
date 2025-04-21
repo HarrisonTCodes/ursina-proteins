@@ -18,14 +18,45 @@ class Protein:
         parser = PDBParser()
         structure = parser.get_structure("protein", pdb_filepath)
 
-        atom_mesh = Mesh(
+        # Atoms
+        atoms_mesh = Mesh(
             mode="point",
             vertices=[atom.coord for atom in structure.get_atoms()],
             colors=[
                 Protein.ELEMENT_COLORS.get(atom.element, color.rgb(1, 0.7, 0.8))
                 for atom in structure.get_atoms()
             ],
-            thickness=0.5,
+            thickness=0.2,
         )
+        self.atoms_entity = Entity(model=atoms_mesh, *args, **kwargs)
 
-        self.atom_entity = Entity(model=atom_mesh, *args, **kwargs)
+        # Chains
+        chains_coords = []
+        chains_colors = []
+        chains_segments = []
+        for chain in structure.get_chains():
+            segment_start = len(chains_coords)
+            # Coords (vertices)
+            chain_coords = [
+                atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
+            ]
+            chains_coords.extend(chain_coords)
+            # Colors
+            chain_color = color.random_color()
+            chains_colors.extend([chain_color for _ in chain_coords])
+            # Segments (triangles)
+            chains_segments.extend(
+                [
+                    (i, i + 1)
+                    for i in range(segment_start, segment_start + len(chain_coords) - 1)
+                ]
+            )
+
+        chains_mesh = Mesh(
+            mode="line",
+            vertices=chains_coords,
+            colors=chains_colors,
+            triangles=chains_segments,
+            thickness=4,
+        )
+        self.chains_entity = Entity(model=chains_mesh, *args, **kwargs)
