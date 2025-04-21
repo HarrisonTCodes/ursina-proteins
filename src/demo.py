@@ -4,9 +4,10 @@ from ursina_proteins.protein import Protein
 
 
 def main():
+    pdb_filepath = input("Enter PDB file path: ")
     app = Ursina()
 
-    Protein()
+    Protein(pdb_filepath)
 
     EditorCamera()
     app.run()
