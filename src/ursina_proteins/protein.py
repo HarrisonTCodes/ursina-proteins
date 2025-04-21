@@ -14,7 +14,14 @@ class Protein:
         "Fe": color.rgb(0.7, 0.45, 0.2),
     }
 
-    def __init__(self, pdb_filepath: str, *args, **kwargs):
+    def __init__(
+        self,
+        pdb_filepath: str,
+        atoms_thickness: float = 0.2,
+        chains_thickness: float = 4,
+        *args,
+        **kwargs,
+    ):
         parser = PDBParser()
         structure = parser.get_structure("protein", pdb_filepath)
 
@@ -26,7 +33,7 @@ class Protein:
                 Protein.ELEMENT_COLORS.get(atom.element, color.rgb(1, 0.7, 0.8))
                 for atom in structure.get_atoms()
             ],
-            thickness=0.2,
+            thickness=atoms_thickness,
         )
         self.atoms_entity = Entity(model=atoms_mesh, *args, **kwargs)
 
@@ -57,6 +64,6 @@ class Protein:
             vertices=chains_coords,
             colors=chains_colors,
             triangles=chains_segments,
-            thickness=4,
+            thickness=chains_thickness,
         )
         self.chains_entity = Entity(model=chains_mesh, *args, **kwargs)
