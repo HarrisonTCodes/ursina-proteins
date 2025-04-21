@@ -2,7 +2,7 @@ from Bio.PDB import PDBParser
 from ursina import Entity, Mesh, color
 
 
-class Protein(Entity):
+class Protein:
     ELEMENT_COLORS = {
         "H": color.rgb(1, 1, 1),
         "C": color.rgb(0.2, 0.2, 0.2),
@@ -18,7 +18,7 @@ class Protein(Entity):
         parser = PDBParser()
         structure = parser.get_structure("protein", pdb_filepath)
 
-        model = Mesh(
+        atom_mesh = Mesh(
             mode="point",
             vertices=[atom.coord for atom in structure.get_atoms()],
             colors=[
@@ -28,4 +28,4 @@ class Protein(Entity):
             thickness=0.5,
         )
 
-        super().__init__(model=model, *args, **kwargs)
+        self.atom_entity = Entity(model=atom_mesh, *args, **kwargs)
