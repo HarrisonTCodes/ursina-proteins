@@ -1,3 +1,5 @@
+from hashlib import md5
+
 from Bio.PDB import PDBParser
 from ursina import Entity, Mesh, color
 
@@ -43,14 +45,21 @@ class Protein:
         chains_segments = []
         for chain in structure.get_chains():
             segment_start = len(chains_coords)
+
             # Coords (vertices)
             chain_coords = [
                 atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
             ]
             chains_coords.extend(chain_coords)
+
             # Colors
-            chain_color = color.random_color()
+            hash_value = int(md5(chain.get_id().encode("utf-8")).hexdigest(), 16)
+            r = (hash_value >> 16) & 0xFF
+            g = (hash_value >> 8) & 0xFF
+            b = hash_value & 0xFF
+            chain_color = color.rgb(r / 255, g / 255, b / 255)
             chains_colors.extend([chain_color for _ in chain_coords])
+
             # Segments (triangles)
             chains_segments.extend(
                 [
