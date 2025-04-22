@@ -6,10 +6,10 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
-A Python package for visualizing protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/).
+A Python package for rendering protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/).
 
 ## Installation
-To install the library locally, clone the repo down and install dependencies with Poetry.
+To install the library locally, clone the repo down and install dependencies with [Poetry](https://python-poetry.org/).
 ```bash
 # Clone the repo
 git clone https://github.com/HarrisonTCodes/ursina-proteins.git
@@ -33,8 +33,8 @@ poetry run python src/demo.py
 ```
 
 ## Contributions
-Contributions are welcome. Please use conventional commits and enable pre-commit hooks.
+Contributions are welcome. Please use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and enable pre-commit hooks.
 ```bash
-# Enabled pre-commit hooks
+# Enable pre-commit hooks
 poetry run pre-commit install
 ```
