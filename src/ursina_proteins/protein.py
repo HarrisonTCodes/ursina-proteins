@@ -37,7 +37,9 @@ class Protein:
             ],
             thickness=atoms_thickness,
         )
-        self.atoms_entity = Entity(model=atoms_mesh, *args, **kwargs)
+        self.atoms_entity = Entity(
+            model=atoms_mesh, origin=structure.center_of_mass(), *args, **kwargs
+        )
 
         # Chains
         chains_coords = []
@@ -75,4 +77,6 @@ class Protein:
             triangles=chains_segments,
             thickness=chains_thickness,
         )
-        self.chains_entity = Entity(model=chains_mesh, *args, **kwargs)
+        self.chains_entity = Entity(
+            model=chains_mesh, origin=structure.center_of_mass(), *args, **kwargs
+        )
