@@ -1,6 +1,8 @@
 from hashlib import md5
 
+import numpy as np
 from Bio.PDB import PDBParser
+from scipy.interpolate import make_splrep, splev
 from ursina import Color, Entity, Mesh, color
 
 
@@ -54,9 +56,22 @@ class Protein:
             segment_start = len(chains_coords)
 
             # Coords (vertices)
-            chain_coords = [
+            carbon_alpha_coords = [
                 atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
             ]
+            # Get spline function for each axis
+            x, y, z = zip(*carbon_alpha_coords)
+            spline_x = make_splrep(range(len(x)), x, s=0)
+            spline_y = make_splrep(range(len(y)), y, s=0)
+            spline_z = make_splrep(range(len(z)), z, s=0)
+            # Calculate splined coordinates
+            step_values = np.linspace(
+                0, len(carbon_alpha_coords) - 1, len(carbon_alpha_coords) * 2
+            )
+            helix_x = splev(step_values, spline_x)
+            helix_y = splev(step_values, spline_y)
+            helix_z = splev(step_values, spline_z)
+            chain_coords = list(zip(helix_x, helix_y, helix_z))
             chains_coords.extend(chain_coords)
 
             # Colors
