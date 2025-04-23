@@ -24,6 +24,7 @@ class Protein:
         atoms_thickness: float = 0.2,
         chains_thickness: float = 4,
         element_color_map: dict[str, Color] = dict(),
+        chain_smoothness: float = 3,
         *args,
         **kwargs,
     ):
@@ -66,7 +67,9 @@ class Protein:
             spline_z = make_splrep(range(len(z)), z, s=0)
             # Calculate splined coordinates
             step_values = np.linspace(
-                0, len(carbon_alpha_coords) - 1, len(carbon_alpha_coords) * 2
+                0,
+                len(carbon_alpha_coords) - 1,
+                len(carbon_alpha_coords) * chain_smoothness,
             )
             helix_x = splev(step_values, spline_x)
             helix_y = splev(step_values, spline_y)
