@@ -26,6 +26,7 @@ class Protein:
     ):
         parser = PDBParser()
         structure = parser.get_structure("protein", pdb_filepath)
+        structure_centre_of_mass = structure.center_of_mass()
 
         # Atoms
         atoms_mesh = Mesh(
@@ -38,7 +39,7 @@ class Protein:
             thickness=atoms_thickness,
         )
         self.atoms_entity = Entity(
-            model=atoms_mesh, origin=structure.center_of_mass(), *args, **kwargs
+            model=atoms_mesh, origin=structure_centre_of_mass, *args, **kwargs
         )
 
         # Chains
@@ -78,5 +79,5 @@ class Protein:
             thickness=chains_thickness,
         )
         self.chains_entity = Entity(
-            model=chains_mesh, origin=structure.center_of_mass(), *args, **kwargs
+            model=chains_mesh, origin=structure_centre_of_mass, *args, **kwargs
         )
