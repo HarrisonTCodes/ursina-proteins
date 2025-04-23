@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ursina (>=7.0.0,<8.0.0)",
-    "biopython (>=1.85,<2.0)"
+    "biopython (>=1.85,<2.0)",
+    "scipy (>=1.15.2,<2.0.0)"
 ]
 
 [tool.poetry]
