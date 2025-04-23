@@ -1,7 +1,7 @@
 from hashlib import md5
 
 from Bio.PDB import PDBParser
-from ursina import Entity, Mesh, color
+from ursina import Color, Entity, Mesh, color
 
 
 class Protein:
@@ -21,6 +21,7 @@ class Protein:
         pdb_filepath: str,
         atoms_thickness: float = 0.2,
         chains_thickness: float = 4,
+        element_color_map: dict[str, Color] = dict(),
         *args,
         **kwargs,
     ):
@@ -33,7 +34,10 @@ class Protein:
             mode="point",
             vertices=[atom.coord for atom in structure.get_atoms()],
             colors=[
-                Protein.ELEMENT_COLORS.get(atom.element, color.rgb(1, 0.7, 0.8))
+                element_color_map.get(
+                    atom.element,
+                    Protein.ELEMENT_COLORS.get(atom.element, color.rgb(1, 0.7, 0.8)),
+                )
                 for atom in structure.get_atoms()
             ],
             thickness=atoms_thickness,
