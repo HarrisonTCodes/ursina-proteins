@@ -69,7 +69,7 @@ class Protein:
             step_values = np.linspace(
                 0,
                 len(carbon_alpha_coords) - 1,
-                len(carbon_alpha_coords) * chain_smoothness,
+                round(len(carbon_alpha_coords) * chain_smoothness),
             )
             helix_x = splev(step_values, spline_x)
             helix_y = splev(step_values, spline_y)
