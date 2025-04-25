@@ -1,9 +1,10 @@
 from hashlib import md5
+from math import sqrt
 
 import numpy as np
 from Bio.PDB import PDBParser
 from scipy.interpolate import make_splrep, splev
-from ursina import Color, Entity, Mesh, color
+from ursina import Color, Entity, Mesh, Vec3, color
 
 
 class Protein:
@@ -18,10 +19,11 @@ class Protein:
         "Fe": color.rgb(0.7, 0.45, 0.2),
     }
 
+    PHI = (1 + sqrt(5)) / 2
+
     def __init__(
         self,
         pdb_filepath: str,
-        atoms_thickness: float = 0.2,
         chains_thickness: float = 4,
         element_color_map: dict[str, Color] = dict(),
         chains_smoothness: float = 3,
@@ -33,7 +35,7 @@ class Protein:
         structure_center_of_mass = self.structure.center_of_mass()
 
         self.atoms_entity = Entity(
-            model=self.compute_atoms_mesh(atoms_thickness, element_color_map),
+            model=self.compute_atoms_mesh(element_color_map),
             origin=structure_center_of_mass,
             *args,
             **kwargs,
@@ -46,21 +48,30 @@ class Protein:
             **kwargs,
         )
 
-    def compute_atoms_mesh(
-        self, thickness: float, element_color_map: dict[str, Color]
-    ) -> Mesh:
-        return Mesh(
-            mode="point",
-            vertices=[atom.coord for atom in self.structure.get_atoms()],
-            colors=[
-                element_color_map.get(
-                    atom.element,
-                    Protein.ELEMENT_COLORS.get(atom.element, color.rgb(1, 0.7, 0.8)),
-                )
-                for atom in self.structure.get_atoms()
-            ],
-            thickness=thickness,
-        )
+    def compute_atoms_mesh(self, element_color_map: dict[str, Color]) -> Mesh:
+        verts = []
+        faces = []
+        colors = []
+
+        for index, atom in enumerate(self.structure.get_atoms()):
+            atom_verts, atom_faces = Protein.get_polyhedron(
+                atom.get_coord(), index * 12
+            )
+            verts.extend(atom_verts)
+            faces.extend(atom_faces)
+            colors.extend(
+                [
+                    element_color_map.get(
+                        atom.element,
+                        Protein.ELEMENT_COLORS.get(
+                            atom.element, color.rgb(1, 0.7, 0.8)
+                        ),
+                    )
+                    for _ in range(12)
+                ]
+            )
+
+        return Mesh(vertices=verts, triangles=faces, colors=colors)
 
     def compute_chains_mesh(self, thickness: float, smoothness: float) -> Mesh:
         coords = []
@@ -116,3 +127,48 @@ class Protein:
             triangles=segments,
             thickness=thickness,
         )
+
+    @staticmethod
+    def get_polyhedron(position: Vec3, initial_tri_count: int) -> list[list[Vec3]]:
+        verts = [
+            Vec3(-1, Protein.PHI, 0),
+            Vec3(1, Protein.PHI, 0),
+            Vec3(-1, -Protein.PHI, 0),
+            Vec3(1, -Protein.PHI, 0),
+            Vec3(0, -1, Protein.PHI),
+            Vec3(0, 1, Protein.PHI),
+            Vec3(0, -1, -Protein.PHI),
+            Vec3(0, 1, -Protein.PHI),
+            Vec3(Protein.PHI, 0, -1),
+            Vec3(Protein.PHI, 0, 1),
+            Vec3(-Protein.PHI, 0, -1),
+            Vec3(-Protein.PHI, 0, 1),
+        ]
+
+        faces = [
+            (0, 11, 5),
+            (0, 5, 1),
+            (0, 1, 7),
+            (0, 7, 10),
+            (0, 10, 11),
+            (1, 5, 9),
+            (5, 11, 4),
+            (11, 10, 2),
+            (10, 7, 6),
+            (7, 1, 8),
+            (3, 9, 4),
+            (3, 4, 2),
+            (3, 2, 6),
+            (3, 6, 8),
+            (3, 8, 9),
+            (4, 9, 5),
+            (2, 4, 11),
+            (6, 2, 10),
+            (8, 6, 7),
+            (9, 8, 1),
+        ]
+
+        return [
+            [(vert * 0.1) + position for vert in verts],
+            [tuple(face[i] + initial_tri_count for i in range(3)) for face in faces],
+        ]
