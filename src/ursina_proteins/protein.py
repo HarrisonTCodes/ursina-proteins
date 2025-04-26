@@ -213,8 +213,8 @@ class Protein:
             for line in pdb_file:
                 if line.startswith("HELIX"):
                     chain_id = line[19].strip()
-                    start_residue = int(line[21:25].strip())
-                    end_residue = int(line[33:37].strip())
+                    start_residue = int(line[21:25].strip()) - 1
+                    end_residue = int(line[33:37].strip()) - 1
 
                     if chain_id in helices:
                         helices[chain_id].append([start_residue, end_residue])
