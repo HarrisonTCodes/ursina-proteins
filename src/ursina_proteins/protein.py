@@ -62,12 +62,24 @@ class Protein:
         "Fe": color.rgb(0.7, 0.45, 0.2),
     }
 
+    CHAIN_COLORS = {
+        "A": color.rgb(1, 0, 0),
+        "B": color.rgb(0, 1, 0),
+        "C": color.rgb(0, 0, 1),
+        "D": color.rgb(1, 1, 0),
+        "E": color.rgb(1, 0.5, 0.8),
+        "F": color.rgb(0.2, 0.7, 1),
+        "G": color.rgb(1, 0.6, 0),
+        "H": color.rgb(1, 0, 1),
+    }
+
     def __init__(
         self,
         pdb_filepath: str,
         chains_thickness: float = 4,
-        element_color_map: dict[str, Color] = dict(),
         chains_smoothness: float = 3,
+        chain_id_color_map: dict[str, Color] = dict(),
+        atom_element_color_map: dict[str, Color] = dict(),
         *args,
         **kwargs,
     ):
@@ -76,14 +88,16 @@ class Protein:
         structure_center_of_mass = self.structure.center_of_mass()
 
         self.atoms_entity = Entity(
-            model=self.compute_atoms_mesh(element_color_map),
+            model=self.compute_atoms_mesh(atom_element_color_map),
             origin=structure_center_of_mass,
             *args,
             **kwargs,
         )
 
         self.chains_entity = Entity(
-            model=self.compute_chains_mesh(chains_thickness, chains_smoothness),
+            model=self.compute_chains_mesh(
+                chain_id_color_map, chains_thickness, chains_smoothness
+            ),
             origin=structure_center_of_mass,
             *args,
             **kwargs,
@@ -127,7 +141,9 @@ class Protein:
 
         return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
-    def compute_chains_mesh(self, thickness: float, smoothness: float) -> Mesh:
+    def compute_chains_mesh(
+        self, id_color_map: dict[str, Color], thickness: float, smoothness: float
+    ) -> Mesh:
         coords = []
         colors = []
         segments = []
@@ -159,11 +175,11 @@ class Protein:
             coords.extend(helix_coords)
 
             # Colors
-            hash_value = int(md5(chain.get_id().encode("utf-8")).hexdigest(), 16)
-            r = (hash_value >> 16) & 0xFF
-            g = (hash_value >> 8) & 0xFF
-            b = hash_value & 0xFF
-            chain_color = color.rgb(r / 255, g / 255, b / 255)
+            chain_id = chain.get_id()
+            chain_color = id_color_map.get(
+                chain_id,
+                Protein.CHAIN_COLORS.get(chain_id, Protein.color_from_id(chain_id)),
+            )
             colors.extend([chain_color for _ in helix_coords])
 
             # Segments (triangles)
@@ -181,3 +197,11 @@ class Protein:
             triangles=segments,
             thickness=thickness,
         )
+
+    @staticmethod
+    def color_from_id(id: str) -> Color:
+        hash_value = int(md5(id.encode("utf-8")).hexdigest(), 16)
+        r = (hash_value >> 16) & 0xFF
+        g = (hash_value >> 8) & 0xFF
+        b = hash_value & 0xFF
+        return color.rgb(r / 255, g / 255, b / 255)
