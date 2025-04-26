@@ -59,6 +59,8 @@ class Protein:
         (9, 8, 1),
     ]
 
+    ICOSAHEDRON_NORMALS = [v.normalized() for v in ICOSAHEDRON_VERTS]
+
     def __init__(
         self,
         pdb_filepath: str,
@@ -90,17 +92,23 @@ class Protein:
         verts = []
         faces = []
         colors = []
+        norms = []
 
         for index, atom in enumerate(self.structure.get_atoms()):
+            # Vertices
             verts.extend(
                 [(vert * 0.1) + atom.get_coord() for vert in Protein.ICOSAHEDRON_VERTS]
             )
+
+            # Faces (triangles)
             faces.extend(
                 [
                     tuple(i + len(Protein.ICOSAHEDRON_VERTS) * index for i in face)
                     for face in Protein.ICOSAHEDRON_FACES
                 ]
             )
+
+            # Colors
             colors.extend(
                 [
                     element_color_map.get(
@@ -113,7 +121,10 @@ class Protein:
                 ]
             )
 
-        return Mesh(vertices=verts, triangles=faces, colors=colors)
+            # Normals
+            norms.extend(Protein.ICOSAHEDRON_NORMALS)
+
+        return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
     def compute_chains_mesh(self, thickness: float, smoothness: float) -> Mesh:
         coords = []
