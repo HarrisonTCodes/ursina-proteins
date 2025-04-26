@@ -158,9 +158,9 @@ class Protein:
 
             # Get spline function for each axis
             x, y, z = zip(*carbon_alpha_coords)
-            spline_x = make_splrep(range(len(x)), x, s=0)
-            spline_y = make_splrep(range(len(y)), y, s=0)
-            spline_z = make_splrep(range(len(z)), z, s=0)
+            splines = [
+                make_splrep(range(len(values)), values, s=0) for values in [x, y, z]
+            ]
 
             # Calculate splined coordinates
             step_values = np.linspace(
@@ -168,11 +168,9 @@ class Protein:
                 len(carbon_alpha_coords) - 1,
                 round(len(carbon_alpha_coords) * smoothness),
             )
-            helix_x = splev(step_values, spline_x)
-            helix_y = splev(step_values, spline_y)
-            helix_z = splev(step_values, spline_z)
-            helix_coords = list(zip(helix_x, helix_y, helix_z))
-            coords.extend(helix_coords)
+            smoothed_xyz = [splev(step_values, spline) for spline in splines]
+            smoothed_coords = list(zip(*smoothed_xyz))
+            coords.extend(smoothed_coords)
 
             # Colors
             chain_id = chain.get_id()
@@ -180,13 +178,15 @@ class Protein:
                 chain_id,
                 Protein.CHAIN_COLORS.get(chain_id, Protein.color_from_id(chain_id)),
             )
-            colors.extend([chain_color for _ in helix_coords])
+            colors.extend([chain_color for _ in smoothed_coords])
 
             # Segments (triangles)
             segments.extend(
                 [
                     (i, i + 1)
-                    for i in range(segment_start, segment_start + len(helix_coords) - 1)
+                    for i in range(
+                        segment_start, segment_start + len(smoothed_coords) - 1
+                    )
                 ]
             )
 
