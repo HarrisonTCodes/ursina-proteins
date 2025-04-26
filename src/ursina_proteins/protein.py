@@ -6,6 +6,49 @@ from Bio.PDB import PDBParser
 from scipy.interpolate import make_splrep, splev
 from ursina import Color, Entity, Mesh, Vec3, color
 
+# Geometry constants
+PHI = (1 + sqrt(5)) / 2
+
+ICOSAHEDRON_VERTS = [
+    Vec3(-1, PHI, 0),
+    Vec3(1, PHI, 0),
+    Vec3(-1, -PHI, 0),
+    Vec3(1, -PHI, 0),
+    Vec3(0, -1, PHI),
+    Vec3(0, 1, PHI),
+    Vec3(0, -1, -PHI),
+    Vec3(0, 1, -PHI),
+    Vec3(PHI, 0, -1),
+    Vec3(PHI, 0, 1),
+    Vec3(-PHI, 0, -1),
+    Vec3(-PHI, 0, 1),
+]
+
+ICOSAHEDRON_FACES = [
+    (0, 11, 5),
+    (0, 5, 1),
+    (0, 1, 7),
+    (0, 7, 10),
+    (0, 10, 11),
+    (1, 5, 9),
+    (5, 11, 4),
+    (11, 10, 2),
+    (10, 7, 6),
+    (7, 1, 8),
+    (3, 9, 4),
+    (3, 4, 2),
+    (3, 2, 6),
+    (3, 6, 8),
+    (3, 8, 9),
+    (4, 9, 5),
+    (2, 4, 11),
+    (6, 2, 10),
+    (8, 6, 7),
+    (9, 8, 1),
+]
+
+ICOSAHEDRON_NORMALS = [v.normalized() for v in ICOSAHEDRON_VERTS]
+
 
 class Protein:
     ELEMENT_COLORS = {
@@ -18,48 +61,6 @@ class Protein:
         "Cl": color.rgb(0, 1, 0),
         "Fe": color.rgb(0.7, 0.45, 0.2),
     }
-
-    PHI = (1 + sqrt(5)) / 2
-
-    ICOSAHEDRON_VERTS = [
-        Vec3(-1, PHI, 0),
-        Vec3(1, PHI, 0),
-        Vec3(-1, -PHI, 0),
-        Vec3(1, -PHI, 0),
-        Vec3(0, -1, PHI),
-        Vec3(0, 1, PHI),
-        Vec3(0, -1, -PHI),
-        Vec3(0, 1, -PHI),
-        Vec3(PHI, 0, -1),
-        Vec3(PHI, 0, 1),
-        Vec3(-PHI, 0, -1),
-        Vec3(-PHI, 0, 1),
-    ]
-
-    ICOSAHEDRON_FACES = [
-        (0, 11, 5),
-        (0, 5, 1),
-        (0, 1, 7),
-        (0, 7, 10),
-        (0, 10, 11),
-        (1, 5, 9),
-        (5, 11, 4),
-        (11, 10, 2),
-        (10, 7, 6),
-        (7, 1, 8),
-        (3, 9, 4),
-        (3, 4, 2),
-        (3, 2, 6),
-        (3, 6, 8),
-        (3, 8, 9),
-        (4, 9, 5),
-        (2, 4, 11),
-        (6, 2, 10),
-        (8, 6, 7),
-        (9, 8, 1),
-    ]
-
-    ICOSAHEDRON_NORMALS = [v.normalized() for v in ICOSAHEDRON_VERTS]
 
     def __init__(
         self,
@@ -97,14 +98,14 @@ class Protein:
         for index, atom in enumerate(self.structure.get_atoms()):
             # Vertices
             verts.extend(
-                [(vert * 0.1) + atom.get_coord() for vert in Protein.ICOSAHEDRON_VERTS]
+                [(vert * 0.1) + atom.get_coord() for vert in ICOSAHEDRON_VERTS]
             )
 
             # Faces (triangles)
             faces.extend(
                 [
-                    tuple(i + len(Protein.ICOSAHEDRON_VERTS) * index for i in face)
-                    for face in Protein.ICOSAHEDRON_FACES
+                    tuple(i + len(ICOSAHEDRON_VERTS) * index for i in face)
+                    for face in ICOSAHEDRON_FACES
                 ]
             )
 
@@ -117,12 +118,12 @@ class Protein:
                             atom.element, color.rgb(1, 0.7, 0.8)
                         ),
                     )
-                    for _ in Protein.ICOSAHEDRON_VERTS
+                    for _ in ICOSAHEDRON_VERTS
                 ]
             )
 
             # Normals
-            norms.extend(Protein.ICOSAHEDRON_NORMALS)
+            norms.extend(ICOSAHEDRON_NORMALS)
 
         return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
