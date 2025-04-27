@@ -166,7 +166,7 @@ class Protein:
                 atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
             ]
             chain_id = chain.get_id()
-            chain_segments = fill_segments(
+            chain_segments = parse_segments(
                 self.helices[chain_id], len(carbon_alpha_coords), "helices", "coils"
             )
 
@@ -258,7 +258,7 @@ class Protein:
         return color.rgb(r / 255, g / 255, b / 255)
 
 
-def fill_segments(
+def parse_segments(
     segments: list[tuple[int]], size: int, in_segment_label: str, out_segment_label: str
 ) -> dict[str, list[tuple[int]]]:
     segments = sorted(segments)
