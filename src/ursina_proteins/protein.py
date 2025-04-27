@@ -224,18 +224,18 @@ class Protein:
         return helices
 
 
-def fill_segments(segments: list[tuple[int]], size: int) -> list[tuple[int]]:
+def fill_segments(segments: list[tuple[int]], size: int) -> dict[str, list[tuple[int]]]:
     segments = sorted(segments)
-    result = []
+    result = {"helices": [], "coils": []}
     current = 0
 
     for start, end in segments:
         if current < start:
-            result.append((current, start - 1))
-        result.append((start, end))
+            result["coils"].append((current, start - 1))
+        result["helices"].append((start, end))
         current = end + 1
 
     if current <= size:
-        result.append((current, size))
+        result["coils"].append((current, size))
 
     return result
