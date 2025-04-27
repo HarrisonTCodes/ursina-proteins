@@ -92,8 +92,8 @@ class Protein:
     def __init__(
         self,
         pdb_filepath: str,
-        helices_thickness: float = 12,
-        coils_thickness: float = 3,
+        helices_thickness: float = 4,
+        coils_thickness: float = 1,
         chains_smoothness: float = 3,
         chain_id_color_map: dict[str, Color] = dict(),
         atom_element_color_map: dict[str, Color] = dict(),
@@ -105,8 +105,8 @@ class Protein:
 
         Args:
             pdb_filepath: Path to the PDB file.
-            helices_thickness: Thickness of helix meshes (default: 12).
-            coils_thickness: Thickness of coil meshes (default: 3).
+            helices_thickness: Thickness of helix meshes (default: 4).
+            coils_thickness: Thickness of coil meshes (default: 1).
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
             chain_id_color_map: Color mapping for chains (default: empty dict).
             atom_element_color_map: Color mapping for atoms (default: empty dict).
