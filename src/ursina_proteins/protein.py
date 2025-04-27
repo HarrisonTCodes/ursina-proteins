@@ -51,6 +51,22 @@ ICOSAHEDRON_NORMALS = [v.normalized() for v in ICOSAHEDRON_VERTS]
 
 
 class Protein:
+    """
+    A class to represent a protein structure and render it as entities in Ursina.
+
+    Attributes:
+        structure: The parsed protein structure.
+        helices: Dictionary mapping chain IDs to lists of helix segments.
+        atoms_entity: Entity containing the mesh representation of atoms.
+        helices_entity: Entity containing the mesh representation of helices.
+        coils_entity: Entity containing the mesh representation of coils.
+        entities: List of all structural entities (atoms, helices, coils).
+
+    Class Attributes:
+        ELEMENT_COLORS: Default color mapping for chemical elements.
+        CHAIN_COLORS: Default color mapping for protein chains.
+    """
+
     ELEMENT_COLORS = {
         "H": color.rgb(1, 1, 1),
         "C": color.rgb(0.2, 0.2, 0.2),
@@ -84,6 +100,20 @@ class Protein:
         *args,
         **kwargs,
     ):
+        """
+        Initialize a Protein object from a PDB file.
+
+        Args:
+            pdb_filepath: Path to the PDB file.
+            helices_thickness: Thickness of helix meshes (default: 12).
+            coils_thickness: Thickness of coil meshes (default: 3).
+            chains_smoothness: Smoothness factor for chain rendering (default: 3).
+            chain_id_color_map: Color mapping for chains (default: empty dict).
+            atom_element_color_map: Color mapping for atoms (default: empty dict).
+            *args: Arguments passed to constructor for each entity.
+            **kwargs: Keyword arguments passed to constructor for each entity.
+        """
+
         parser = PDBParser()
         self.structure = parser.get_structure("protein", pdb_filepath)
         self.helices = self.get_helices(pdb_filepath)
@@ -115,6 +145,19 @@ class Protein:
         self.entities = [self.atoms_entity, self.helices_entity, self.coils_entity]
 
     def compute_atoms_mesh(self, element_color_map: dict[str, Color]) -> Mesh:
+        """
+        Compute the mesh of atoms in the protein structure.
+
+        This method creates an icosahedron for each atom in the protein structure
+        and assigns colors based on the element type, combining them into one mesh.
+
+        Args:
+            element_color_map: Color mapping for atom elements.
+
+        Returns:
+            A Mesh object representing all atoms in the protein structure.
+        """
+
         verts = []
         faces = []
         colors = []
@@ -159,6 +202,23 @@ class Protein:
         helices_thickness: float,
         coils_thickness: float,
     ) -> list[Mesh]:
+        """
+        Compute the meshes for helices and coils in the protein structure.
+
+        This method creates line meshes for helices and coils, applying spline
+        smoothing to the backbone coordinates and assigning colors based on chain IDs.
+        A single mesh is created for each segment type (helix/coil) across all chains.
+
+        Args:
+            id_color_map: Color mapping for chain IDs.
+            smoothness: Factor controlling the smoothness of the chains.
+            helices_thickness: Thickness of helix meshes.
+            coils_thickness: Thickness of coil meshes.
+
+        Returns:
+            A list containing two Mesh objects: one for helices and one for coils.
+        """
+
         verts = {"helices": [], "coils": []}
         tris = {"helices": [], "coils": []}
         colors = {"helices": [], "coils": []}
@@ -232,6 +292,20 @@ class Protein:
         ]
 
     def get_helices(self, pdb_filepath: str) -> dict[str, list[tuple[int]]]:
+        """
+        Extract helix information for a protein from a PDB file.
+
+        This method parses the HELIX records in a PDB file to identify
+        the start and end residues of helices for each chain.
+
+        Args:
+            pdb_filepath: Path to the PDB file.
+
+        Returns:
+            A dictionary mapping chain IDs to lists of helices,
+            where each segment is represented as a tuple of start/end indices.
+        """
+
         helices = dict()
 
         with open(pdb_filepath, "r") as pdb_file:
@@ -250,6 +324,19 @@ class Protein:
 
     @staticmethod
     def color_from_id(id: str) -> Color:
+        """
+        Generate a deterministic color based on a string identifier.
+
+        This method creates a consistent color for a given ID string by hashing
+        the string and extracting RGB values from the hash.
+
+        Args:
+            id: String identifier to generate a color for.
+
+        Returns:
+            A Color object with RGB values derived from the hash of the input ID.
+        """
+
         hash_value = int(md5(id.encode("utf-8")).hexdigest(), 16)
         r = (hash_value >> 16) & 0xFF
         g = (hash_value >> 8) & 0xFF
@@ -260,6 +347,23 @@ class Protein:
 def parse_segments(
     segments: list[tuple[int]], size: int, in_segment_label: str, out_segment_label: str
 ) -> dict[str, list[tuple[int]]]:
+    """
+    Parse a list of segments and fill in the gaps between them.
+
+    This utility function takes a list of segment indices and generates
+    a complete segmentation by filling in the gaps between them.
+
+    Args:
+        segments: List of segments, each represented as a tuple of (start, end) indices.
+        size: The total size to cover.
+        in_segment_label: Label for the input segments.
+        out_segment_label: Label for the gaps between input segments.
+
+    Returns:
+        A dictionary with two keys (in_segment_label and out_segment_label),
+        each mapping to a list of (start, end) tuples representing the segments.
+    """
+
     segments = sorted(segments)
     result = {in_segment_label: [], out_segment_label: []}
     current = 0
