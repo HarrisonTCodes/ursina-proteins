@@ -9,7 +9,7 @@
 
 A Python package for rendering protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/).
 
-![Example proteins](./assets/image.png)
+![Example proteins](./assets/example.png)
 
 ## Installation
 To install the library locally, clone the repo down and install dependencies with [Poetry](https://python-poetry.org/).
