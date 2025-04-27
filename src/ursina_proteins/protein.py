@@ -112,6 +112,8 @@ class Protein:
             **kwargs,
         )
 
+        self.entities = [self.atoms_entity, self.helices_entity, self.coils_entity]
+
     def compute_atoms_mesh(self, element_color_map: dict[str, Color]) -> Mesh:
         verts = []
         faces = []
