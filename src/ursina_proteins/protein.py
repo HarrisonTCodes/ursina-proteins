@@ -206,7 +206,7 @@ class Protein:
         b = hash_value & 0xFF
         return color.rgb(r / 255, g / 255, b / 255)
 
-    def get_helices(self, pdb_filepath: str):
+    def get_helices(self, pdb_filepath: str) -> dict[str, list[tuple[int]]]:
         helices = dict()
 
         with open(pdb_filepath, "r") as pdb_file:
@@ -217,8 +217,25 @@ class Protein:
                     end_residue = int(line[33:37].strip()) - 1
 
                     if chain_id in helices:
-                        helices[chain_id].append([start_residue, end_residue])
+                        helices[chain_id].append((start_residue, end_residue))
                     else:
                         helices[chain_id] = [(start_residue, end_residue)]
 
         return helices
+
+
+def fill_segments(segments: list[tuple[int]], size: int) -> list[tuple[int]]:
+    segments = sorted(segments)
+    result = []
+    current = 0
+
+    for start, end in segments:
+        if current < start:
+            result.append((current, start - 1))
+        result.append((start, end))
+        current = end + 1
+
+    if current <= size:
+        result.append((current, size))
+
+    return result
