@@ -9,19 +9,19 @@ class TestFillSegments(unittest.TestCase):
         segments = [(5, 10), (14, 15)]
         size = 20
         expected = {
-            "helices": [(5, 10), (14, 15)],
-            "coils": [(0, 5), (10, 14), (15, 20)],
+            "a": [(5, 10), (14, 15)],
+            "b": [(0, 5), (10, 14), (15, 20)],
         }
-        self.assertEqual(fill_segments(segments, size), expected)
+        self.assertEqual(fill_segments(segments, size, "a", "b"), expected)
 
     def test_start_with_segment(self):
         segments = [(0, 10)]
         size = 20
-        expected = {"helices": [(0, 10)], "coils": [(10, 20)]}
-        self.assertEqual(fill_segments(segments, size), expected)
+        expected = {"a": [(0, 10)], "b": [(10, 20)]}
+        self.assertEqual(fill_segments(segments, size, "a", "b"), expected)
 
     def test_empty_segments(self):
         segments = []
         size = 12
-        expected = {"helices": [], "coils": [(0, 12)]}
-        self.assertEqual(fill_segments(segments, size), expected)
+        expected = {"a": [], "b": [(0, 12)]}
+        self.assertEqual(fill_segments(segments, size, "a", "b"), expected)

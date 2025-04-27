@@ -167,7 +167,7 @@ class Protein:
             ]
             chain_id = chain.get_id()
             chain_segments = fill_segments(
-                self.helices[chain_id], len(carbon_alpha_coords)
+                self.helices[chain_id], len(carbon_alpha_coords), "helices", "coils"
             )
 
             for segment_type, segments in chain_segments.items():
@@ -258,18 +258,20 @@ class Protein:
         return color.rgb(r / 255, g / 255, b / 255)
 
 
-def fill_segments(segments: list[tuple[int]], size: int) -> dict[str, list[tuple[int]]]:
+def fill_segments(
+    segments: list[tuple[int]], size: int, in_segment_label: str, out_segment_label: str
+) -> dict[str, list[tuple[int]]]:
     segments = sorted(segments)
-    result = {"helices": [], "coils": []}
+    result = {in_segment_label: [], out_segment_label: []}
     current = 0
 
     for start, end in segments:
         if current < start:
-            result["coils"].append((current, start))
-        result["helices"].append((start, end))
+            result[out_segment_label].append((current, start))
+        result[in_segment_label].append((start, end))
         current = end
 
     if current <= size:
-        result["coils"].append((current, size))
+        result[out_segment_label].append((current, size))
 
     return result
