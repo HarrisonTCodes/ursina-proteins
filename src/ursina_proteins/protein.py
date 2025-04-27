@@ -76,7 +76,8 @@ class Protein:
     def __init__(
         self,
         pdb_filepath: str,
-        chains_thickness: float = 4,
+        helices_thickness: float = 12,
+        coils_thickness: float = 3,
         chains_smoothness: float = 3,
         chain_id_color_map: dict[str, Color] = dict(),
         atom_element_color_map: dict[str, Color] = dict(),
@@ -85,6 +86,7 @@ class Protein:
     ):
         parser = PDBParser()
         self.structure = parser.get_structure("protein", pdb_filepath)
+        self.helices = self.get_helices(pdb_filepath)
         structure_center_of_mass = self.structure.center_of_mass()
 
         self.atoms_entity = Entity(
@@ -94,10 +96,17 @@ class Protein:
             **kwargs,
         )
 
-        self.chains_entity = Entity(
-            model=self.compute_chains_mesh(
-                chain_id_color_map, chains_thickness, chains_smoothness
-            ),
+        chain_meshes = self.compute_helices_and_coils_meshes(
+            chain_id_color_map, chains_smoothness, helices_thickness, coils_thickness
+        )
+        self.helices_entity = Entity(
+            model=chain_meshes[0],
+            origin=structure_center_of_mass,
+            *args,
+            **kwargs,
+        )
+        self.coils_entity = Entity(
+            model=chain_meshes[1],
             origin=structure_center_of_mass,
             *args,
             **kwargs,
@@ -141,70 +150,84 @@ class Protein:
 
         return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
-    def compute_chains_mesh(
-        self, id_color_map: dict[str, Color], thickness: float, smoothness: float
-    ) -> Mesh:
-        coords = []
-        colors = []
-        segments = []
+    def compute_helices_and_coils_meshes(
+        self,
+        id_color_map: dict[str, Color],
+        smoothness: float,
+        helices_thickness: float,
+        coils_thickness: float,
+    ) -> list[Mesh]:
+        verts = {"helices": [], "coils": []}
+        tris = {"helices": [], "coils": []}
+        colors = {"helices": [], "coils": []}
 
         for chain in self.structure.get_chains():
-            segment_start = len(coords)
-
-            # Coords (vertices)
             carbon_alpha_coords = [
                 atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
             ]
-
-            # Get spline function for each axis
-            x, y, z = zip(*carbon_alpha_coords)
-            splines = [
-                make_splrep(range(len(values)), values, s=0) for values in [x, y, z]
-            ]
-
-            # Calculate splined coordinates
-            step_values = np.linspace(
-                0,
-                len(carbon_alpha_coords) - 1,
-                round(len(carbon_alpha_coords) * smoothness),
-            )
-            smoothed_xyz = [splev(step_values, spline) for spline in splines]
-            smoothed_coords = list(zip(*smoothed_xyz))
-            coords.extend(smoothed_coords)
-
-            # Colors
             chain_id = chain.get_id()
-            chain_color = id_color_map.get(
-                chain_id,
-                Protein.CHAIN_COLORS.get(chain_id, Protein.color_from_id(chain_id)),
+            chain_segments = fill_segments(
+                self.helices[chain_id], len(carbon_alpha_coords)
             )
-            colors.extend([chain_color for _ in smoothed_coords])
 
-            # Segments (triangles)
-            segments.extend(
-                [
-                    (i, i + 1)
-                    for i in range(
-                        segment_start, segment_start + len(smoothed_coords) - 1
+            for segment_type, segments in chain_segments.items():
+                for start, end in segments:
+                    atoms = carbon_alpha_coords[start : end + 1]
+                    if not atoms:
+                        continue
+                    tris_start = len(verts[segment_type])
+
+                    # Vertices
+                    x, y, z = zip(*atoms)
+                    splines = [
+                        make_splrep(
+                            range(len(values)), values, s=0, k=min(3, len(values) - 1)
+                        )
+                        for values in [x, y, z]
+                    ]
+
+                    # Calculate splined coordinates
+                    step_values = np.linspace(
+                        0,
+                        len(atoms) - 1,
+                        round(len(atoms) * smoothness),
                     )
-                ]
+                    smoothed_xyz = [splev(step_values, spline) for spline in splines]
+                    smoothed_coords = list(zip(*smoothed_xyz))
+                    verts[segment_type].extend(smoothed_coords)
+
+                    # Colors
+                    chain_id = chain.get_id()
+                    chain_color = id_color_map.get(
+                        chain_id,
+                        Protein.CHAIN_COLORS.get(
+                            chain_id, Protein.color_from_id(chain_id)
+                        ),
+                    )
+                    colors[segment_type].extend([chain_color for _ in smoothed_coords])
+
+                    # Triangles
+                    tris[segment_type].extend(
+                        [
+                            (i, i + 1)
+                            for i in range(
+                                tris_start, tris_start + len(smoothed_coords) - 1
+                            )
+                        ]
+                    )
+
+        return [
+            Mesh(
+                mode="line",
+                vertices=verts[segment_type],
+                triangles=tris[segment_type],
+                colors=colors[segment_type],
+                thickness=thickness,
             )
-
-        return Mesh(
-            mode="line",
-            vertices=coords,
-            colors=colors,
-            triangles=segments,
-            thickness=thickness,
-        )
-
-    @staticmethod
-    def color_from_id(id: str) -> Color:
-        hash_value = int(md5(id.encode("utf-8")).hexdigest(), 16)
-        r = (hash_value >> 16) & 0xFF
-        g = (hash_value >> 8) & 0xFF
-        b = hash_value & 0xFF
-        return color.rgb(r / 255, g / 255, b / 255)
+            for thickness, segment_type in zip(
+                (helices_thickness, coils_thickness), ("helices", "coils")
+            )
+        ]
 
     def get_helices(self, pdb_filepath: str) -> dict[str, list[tuple[int]]]:
         helices = dict()
@@ -215,6 +238,9 @@ class Protein:
                     chain_id = line[19].strip()
                     start_residue = int(line[21:25].strip()) - 1
                     end_residue = int(line[33:37].strip()) - 1
+                    helix_class = int(line[38:40].strip())
+                    if helix_class != 1:
+                        continue
 
                     if chain_id in helices:
                         helices[chain_id].append((start_residue, end_residue))
@@ -222,6 +248,14 @@ class Protein:
                         helices[chain_id] = [(start_residue, end_residue)]
 
         return helices
+
+    @staticmethod
+    def color_from_id(id: str) -> Color:
+        hash_value = int(md5(id.encode("utf-8")).hexdigest(), 16)
+        r = (hash_value >> 16) & 0xFF
+        g = (hash_value >> 8) & 0xFF
+        b = hash_value & 0xFF
+        return color.rgb(r / 255, g / 255, b / 255)
 
 
 def fill_segments(segments: list[tuple[int]], size: int) -> dict[str, list[tuple[int]]]:
@@ -231,9 +265,9 @@ def fill_segments(segments: list[tuple[int]], size: int) -> dict[str, list[tuple
 
     for start, end in segments:
         if current < start:
-            result["coils"].append((current, start - 1))
+            result["coils"].append((current, start))
         result["helices"].append((start, end))
-        current = end + 1
+        current = end
 
     if current <= size:
         result["coils"].append((current, size))

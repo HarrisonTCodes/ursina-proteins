@@ -10,14 +10,14 @@ class TestFillSegments(unittest.TestCase):
         size = 20
         expected = {
             "helices": [(5, 10), (14, 15)],
-            "coils": [(0, 4), (11, 13), (16, 20)],
+            "coils": [(0, 5), (10, 14), (15, 20)],
         }
         self.assertEqual(fill_segments(segments, size), expected)
 
     def test_start_with_segment(self):
         segments = [(0, 10)]
         size = 20
-        expected = {"helices": [(0, 10)], "coils": [(11, 20)]}
+        expected = {"helices": [(0, 10)], "coils": [(10, 20)]}
         self.assertEqual(fill_segments(segments, size), expected)
 
     def test_empty_segments(self):
