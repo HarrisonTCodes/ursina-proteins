@@ -238,9 +238,6 @@ class Protein:
                     chain_id = line[19].strip()
                     start_residue = int(line[21:25].strip()) - 1
                     end_residue = int(line[33:37].strip()) - 1
-                    helix_class = int(line[38:40].strip())
-                    if helix_class != 1:
-                        continue
 
                     if chain_id in helices:
                         helices[chain_id].append((start_residue, end_residue))
