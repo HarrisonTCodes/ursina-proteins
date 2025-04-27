@@ -68,13 +68,13 @@ class Protein:
     """
 
     ELEMENT_COLORS = {
-        "H": color.rgb(1, 1, 1),
+        "H": color.rgb(0.8, 0.8, 0.8),
         "C": color.rgb(0.2, 0.2, 0.2),
-        "N": color.rgb(0, 0, 1),
-        "O": color.rgb(1, 0, 0),
-        "S": color.rgb(1, 1, 0),
+        "N": color.rgb(0, 0, 0.8),
+        "O": color.rgb(0.8, 0, 0),
+        "S": color.rgb(0.8, 0.8, 0),
         "P": color.rgb(1, 0.65, 0),
-        "Cl": color.rgb(0, 1, 0),
+        "Cl": color.rgb(0, 0.8, 0),
         "Fe": color.rgb(0.7, 0.45, 0.2),
     }
 
