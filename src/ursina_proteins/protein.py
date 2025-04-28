@@ -241,11 +241,11 @@ class Protein:
             for segment_type, segments in chain_segments.items():
                 for start, end in segments:
                     # Get coordinates of the segment's carbon alpha atoms
-                    coords = []
-                    for i in range(start, end + 1):
-                        coord = carbon_alpha_coords.get(i)
-                        if coord is not None:
-                            coords.append(coord)
+                    coords = [
+                        coord
+                        for i in range(start, end + 1)
+                        if (coord := carbon_alpha_coords.get(i)) is not None
+                    ]
 
                     tris_start = len(verts[segment_type])
 
