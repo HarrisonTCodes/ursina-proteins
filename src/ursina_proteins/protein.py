@@ -224,23 +224,33 @@ class Protein:
         colors = {"helices": [], "coils": []}
 
         for chain in self.structure.get_chains():
-            carbon_alpha_coords = [
-                atom.coord for atom in chain.get_atoms() if atom.get_id() == "CA"
-            ]
+            # Map of atom number to atom coordinate
+            carbon_alpha_coords = {
+                atom.get_parent().get_id()[1]: atom.coord
+                for atom in chain.get_atoms()
+                if atom.get_id() == "CA"
+            }
+
+            # Chain info
             chain_id = chain.get_id()
             chain_segments = parse_segments(
                 self.helices[chain_id], len(carbon_alpha_coords), "helices", "coils"
             )
 
+            # Render each segment (helices and coils)
             for segment_type, segments in chain_segments.items():
                 for start, end in segments:
-                    atoms = carbon_alpha_coords[start : end + 1]
-                    if not atoms:
-                        continue
+                    # Get coordinates of the segment's carbon alpha atoms
+                    coords = []
+                    for i in range(start, end + 1):
+                        coord = carbon_alpha_coords.get(i)
+                        if coord is not None:
+                            coords.append(coord)
+
                     tris_start = len(verts[segment_type])
 
                     # Vertices
-                    x, y, z = zip(*atoms)
+                    x, y, z = zip(*coords)
                     splines = [
                         make_splrep(
                             range(len(values)), values, s=0, k=min(3, len(values) - 1)
@@ -251,8 +261,8 @@ class Protein:
                     # Calculate splined coordinates
                     step_values = np.linspace(
                         0,
-                        len(atoms) - 1,
-                        round(len(atoms) * smoothness),
+                        len(coords) - 1,
+                        round(len(coords) * smoothness),
                     )
                     smoothed_xyz = [splev(step_values, spline) for spline in splines]
                     smoothed_coords = list(zip(*smoothed_xyz))
@@ -312,8 +322,8 @@ class Protein:
             for line in pdb_file:
                 if line.startswith("HELIX"):
                     chain_id = line[19].strip()
-                    start_residue = int(line[21:25].strip()) - 1
-                    end_residue = int(line[33:37].strip()) - 1
+                    start_residue = int(line[21:25].strip())
+                    end_residue = int(line[33:37].strip())
 
                     if chain_id in helices:
                         helices[chain_id].append((start_residue, end_residue))
