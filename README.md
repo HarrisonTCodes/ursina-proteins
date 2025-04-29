@@ -24,16 +24,15 @@ poetry install
 ```
 
 ## Usage
-You can use the library in an existing Ursina project by importing the Protein class and creating an instance from a PDB file.
+You can use the library in an existing Ursina project by importing the Protein class and creating an instance from a PDB file. You can render any proteins in the PDB file format, and can find many available for download at the [RCSB Protein Data Bank](https://www.rcsb.org/).
 ```python
 from ursina_proteins.protein import Protein
 
 Protein("/path/to/file.pdb")
 ```
-You can also test the library out and render a protein by running the `demo.py`. You can render any proteins in the PDB file format, such as [hemoglobin](https://doi.org/10.2210/pdb1a3n/pdb) or this [small example file](https://gist.github.com/cstein/6699200).
+You can also test the library out by running `demo.py`. This script renders a simple scene with an example protein ([insulin](https://www.rcsb.org/structure/3I40)).
 ```bash
 poetry run python src/demo.py
-# You will then be prompted to enter the path to a PDB file
 ```
 
 ## Contributions
