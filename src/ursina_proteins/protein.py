@@ -92,6 +92,7 @@ class Protein:
     def __init__(
         self,
         pdb_filepath: str,
+        atoms_size: float = 0.1,
         helices_thickness: float = 4,
         coils_thickness: float = 1,
         chains_smoothness: float = 3,
@@ -105,6 +106,7 @@ class Protein:
 
         Args:
             pdb_filepath: Path to the PDB file.
+            atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
             helices_thickness: Thickness of helix meshes (default: 4).
             coils_thickness: Thickness of coil meshes (default: 1).
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
@@ -120,7 +122,7 @@ class Protein:
         structure_center_of_mass = self.structure.center_of_mass()
 
         self.atoms_entity = Entity(
-            model=self.compute_atoms_mesh(atom_element_color_map),
+            model=self.compute_atoms_mesh(atoms_size, atom_element_color_map),
             origin=structure_center_of_mass,
             *args,
             **kwargs,
@@ -144,7 +146,9 @@ class Protein:
 
         self.entities = [self.atoms_entity, self.helices_entity, self.coils_entity]
 
-    def compute_atoms_mesh(self, element_color_map: dict[str, Color]) -> Mesh:
+    def compute_atoms_mesh(
+        self, atoms_size: float, element_color_map: dict[str, Color]
+    ) -> Mesh:
         """
         Compute the mesh of atoms in the protein structure.
 
@@ -152,6 +156,7 @@ class Protein:
         and assigns colors based on the element type, combining them into one mesh.
 
         Args:
+            atoms_size: Size of individual atoms.
             element_color_map: Color mapping for atom elements.
 
         Returns:
@@ -166,7 +171,7 @@ class Protein:
         for index, atom in enumerate(self.structure.get_atoms()):
             # Vertices
             verts.extend(
-                [(vert * 0.1) + atom.get_coord() for vert in ICOSAHEDRON_VERTS]
+                [(vert * atoms_size) + atom.get_coord() for vert in ICOSAHEDRON_VERTS]
             )
 
             # Faces (triangles)
