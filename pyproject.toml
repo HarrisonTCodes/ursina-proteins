@@ -1,9 +1,11 @@
 [project]
 name = "ursina-proteins"
-version = "0.1.0"
-description = ""
+version = "1.0.0"
+description = "A Python package for rendering protein structures of PDB format in 3D using Ursina"
 readme = "README.md"
 requires-python = ">=3.12"
+license = {file = "LICENSE"}
+authors = [{name = "HarrisonTCodes"}]
 dependencies = [
     "ursina (>=7.0.0,<8.0.0)",
     "biopython (>=1.85,<2.0)",
@@ -19,6 +21,10 @@ isort = "^6.0.1"
 flake8 = "^7.2.0"
 pytest = "^8.3.5"
 pre-commit = "^4.2.0"
+
+[project.urls]
+Homepage = "https://github.com/HarrisonTCodes/ursina-proteins"
+Source = "https://github.com/HarrisonTCodes/ursina-proteins"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
