@@ -1,5 +1,6 @@
 from hashlib import md5
 from math import sqrt
+from os import path
 
 import numpy as np
 from Bio.PDB import PDBParser
@@ -96,8 +97,8 @@ class Protein:
         helices_thickness: float = 4,
         coils_thickness: float = 1,
         chains_smoothness: float = 3,
-        chain_id_color_map: dict[str, Color] = dict(),
-        atom_element_color_map: dict[str, Color] = dict(),
+        chain_id_color_map: dict[str, Color] = None,
+        atom_element_color_map: dict[str, Color] = None,
         *args,
         **kwargs,
     ):
@@ -116,11 +117,28 @@ class Protein:
             **kwargs: Keyword arguments passed to constructor for each entity.
         """
 
-        parser = PDBParser()
+        # Validation
+        if chain_id_color_map is None:
+            chain_id_color_map = dict()
+        if atom_element_color_map is None:
+            atom_element_color_map = dict()
+
+        if not path.isfile(pdb_filepath):
+            raise FileNotFoundError(f"PDB file not found: {pdb_filepath}")
+
+        if helices_thickness <= 0 or coils_thickness <= 0 or atoms_size <= 0:
+            raise ValueError("Thickness and size values must be positive")
+
+        if chains_smoothness < 1:
+            raise ValueError("Smoothness value must be at least 1")
+
+        # Parse structure
+        parser = PDBParser(QUIET=True)
         self.structure = parser.get_structure("protein", pdb_filepath)
         self.helices = self.get_helices(pdb_filepath)
         structure_center_of_mass = self.structure.center_of_mass()
 
+        # Create entities
         self.atoms_entity = Entity(
             model=self.compute_atoms_mesh(atoms_size, atom_element_color_map),
             origin=structure_center_of_mass,
