@@ -8,12 +8,13 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A Python package for rendering protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/).
+A Python package for rendering protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/), as featured in [Ursina's sample projects](https://www.ursinaengine.org/samples.html).
 
 ![Example proteins](./assets/example.png)
 
 ## Installation
-To install the library locally, clone the repo down and install dependencies with [Poetry](https://python-poetry.org/).
+The package is published on [PyPI](https://pypi.org/project/ursina-proteins/), and can be installed with `pip install ursina-proteins`.
+You can also clone the repo down and install dependencies with [Poetry](https://python-poetry.org/).
 ```bash
 # Clone the repo
 git clone https://github.com/HarrisonTCodes/ursina-proteins.git
@@ -24,13 +25,13 @@ poetry install
 ```
 
 ## Usage
-You can use the library in an existing Ursina project by importing the Protein class and creating an instance from a PDB file. You can render any proteins in the PDB file format, and can find many available for download at the [RCSB Protein Data Bank](https://www.rcsb.org/).
+You can use the library in an existing Ursina project by importing the `Protein` class and creating an instance from a PDB file. You can render any proteins in the PDB file format, and can find many available for download at the [RCSB Protein Data Bank](https://www.rcsb.org/).
 ```python
 from ursina_proteins.protein import Protein
 
 Protein("/path/to/file.pdb")
 ```
-You can also test the library out by running `demo.py`. This script renders a simple scene with an example protein ([insulin](https://www.rcsb.org/structure/3I40)).
+You can also test the library out by running [demo.py](https://github.com/HarrisonTCodes/ursina-proteins/blob/main/src/demo.py). This script renders a simple scene with an example protein ([insulin](https://www.rcsb.org/structure/3I40)).
 ```bash
 poetry run python src/demo.py
 ```
