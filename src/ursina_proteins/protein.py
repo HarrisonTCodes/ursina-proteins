@@ -292,7 +292,6 @@ class Protein:
                     verts[segment_type].extend(smoothed_coords)
 
                     # Colors
-                    chain_id = chain.get_id()
                     chain_color = id_color_map.get(
                         chain_id,
                         Protein.CHAIN_COLORS.get(
