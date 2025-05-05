@@ -111,8 +111,8 @@ class Protein:
             helices_thickness: Thickness of helix meshes (default: 4).
             coils_thickness: Thickness of coil meshes (default: 1).
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
-            chain_id_color_map: Color mapping for chains (default: empty dict).
-            atom_element_color_map: Color mapping for atoms (default: empty dict).
+            chain_id_color_map: Color mapping for chains (default: None).
+            atom_element_color_map: Color mapping for atoms (default: None).
             *args: Arguments passed to constructor for each entity.
             **kwargs: Keyword arguments passed to constructor for each entity.
         """
