@@ -99,6 +99,9 @@ class Protein:
         chains_smoothness: float = 3,
         chain_id_color_map: dict[str, Color] = None,
         atom_element_color_map: dict[str, Color] = None,
+        atom_vertices: list[Vec3] = None,
+        atom_triangles: list[tuple[int]] = None,
+        atom_normals: list[Vec3] = None,
         *args,
         **kwargs,
     ):
@@ -113,6 +116,9 @@ class Protein:
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
             chain_id_color_map: Color mapping for chains (default: None).
             atom_element_color_map: Color mapping for atoms (default: None).
+            atom_vertices: Base vertices to use for atom geometry (default: None).
+            atom_triangles: Base triangles to use for atom geometry (default: None).
+            atom_normals: Base normals to use for atom geometry (default: None).
             *args: Arguments passed to constructor for each entity.
             **kwargs: Keyword arguments passed to constructor for each entity.
         """
@@ -140,7 +146,13 @@ class Protein:
 
         # Create entities
         self.atoms_entity = Entity(
-            model=self.compute_atoms_mesh(atoms_size, atom_element_color_map),
+            model=self.compute_atoms_mesh(
+                atoms_size,
+                atom_element_color_map,
+                atom_vertices if atom_vertices else ICOSAHEDRON_VERTS,
+                atom_triangles if atom_triangles else ICOSAHEDRON_FACES,
+                atom_normals if atom_normals else ICOSAHEDRON_NORMALS,
+            ),
             origin=structure_center_of_mass,
             *args,
             **kwargs,
@@ -165,7 +177,12 @@ class Protein:
         self.entities = [self.atoms_entity, self.helices_entity, self.coils_entity]
 
     def compute_atoms_mesh(
-        self, atoms_size: float, element_color_map: dict[str, Color]
+        self,
+        atoms_size: float,
+        element_color_map: dict[str, Color],
+        base_vertices: list[Vec3],
+        base_triangles: list[tuple[int]],
+        base_normals: list[Vec3],
     ) -> Mesh:
         """
         Compute the mesh of atoms in the protein structure.
@@ -176,6 +193,9 @@ class Protein:
         Args:
             atoms_size: Size of individual atoms.
             element_color_map: Color mapping for atom elements.
+            base_vertices: Base vertices to use for atom geometry
+            base_triangles: Base triangles to use for atom geometry
+            base_normals: Base normals to use for atom geometry
 
         Returns:
             A Mesh object representing all atoms in the protein structure.
@@ -189,14 +209,14 @@ class Protein:
         for index, atom in enumerate(self.structure.get_atoms()):
             # Vertices
             verts.extend(
-                [(vert * atoms_size) + atom.get_coord() for vert in ICOSAHEDRON_VERTS]
+                [(vert * atoms_size) + atom.get_coord() for vert in base_vertices]
             )
 
             # Faces (triangles)
             faces.extend(
                 [
-                    tuple(i + len(ICOSAHEDRON_VERTS) * index for i in face)
-                    for face in ICOSAHEDRON_FACES
+                    tuple(i + len(base_vertices) * index for i in face)
+                    for face in base_triangles
                 ]
             )
 
@@ -209,12 +229,12 @@ class Protein:
                             atom.element, color.rgb(1, 0.7, 0.8)
                         ),
                     )
-                    for _ in ICOSAHEDRON_VERTS
+                    for _ in base_vertices
                 ]
             )
 
             # Normals
-            norms.extend(ICOSAHEDRON_NORMALS)
+            norms.extend(base_normals)
 
         return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
