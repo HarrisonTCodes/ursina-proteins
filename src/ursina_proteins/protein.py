@@ -93,6 +93,7 @@ class Protein:
     def __init__(
         self,
         pdb_filepath: str,
+        compute_atoms: bool = True,
         atoms_size: float = 0.1,
         helices_thickness: float = 4,
         coils_thickness: float = 1,
@@ -110,6 +111,7 @@ class Protein:
 
         Args:
             pdb_filepath: Path to the PDB file.
+            compute_atoms: Flag to enable/disable atoms computation (default: True).
             atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
             helices_thickness: Thickness of helix meshes (default: 4).
             coils_thickness: Thickness of coil meshes (default: 1).
@@ -145,18 +147,22 @@ class Protein:
         structure_center_of_mass = self.structure.center_of_mass()
 
         # Create entities
-        self.atoms_entity = Entity(
-            model=self.compute_atoms_mesh(
-                atoms_size,
-                atom_element_color_map,
-                atom_vertices if atom_vertices else ICOSAHEDRON_VERTS,
-                atom_triangles if atom_triangles else ICOSAHEDRON_FACES,
-                atom_normals if atom_normals else ICOSAHEDRON_NORMALS,
-            ),
-            origin=structure_center_of_mass,
-            *args,
-            **kwargs,
-        )
+        self.entities = []
+
+        if compute_atoms:
+            self.atoms_entity = Entity(
+                model=self.compute_atoms_mesh(
+                    atoms_size,
+                    atom_element_color_map,
+                    atom_vertices if atom_vertices else ICOSAHEDRON_VERTS,
+                    atom_triangles if atom_triangles else ICOSAHEDRON_FACES,
+                    atom_normals if atom_normals else ICOSAHEDRON_NORMALS,
+                ),
+                origin=structure_center_of_mass,
+                *args,
+                **kwargs,
+            )
+            self.entities.append(self.atoms_entity)
 
         chain_meshes = self.compute_helices_and_coils_meshes(
             chain_id_color_map, chains_smoothness, helices_thickness, coils_thickness
@@ -173,8 +179,7 @@ class Protein:
             *args,
             **kwargs,
         )
-
-        self.entities = [self.atoms_entity, self.helices_entity, self.coils_entity]
+        self.entities.extend([self.helices_entity, self.coils_entity])
 
     def compute_atoms_mesh(
         self,
