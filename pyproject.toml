@@ -2,30 +2,38 @@
 name = "ursina-proteins"
 version = "1.1.0"
 description = "A Python package for rendering protein structures of PDB format in 3D using Ursina"
-readme = "README.md"
+authors = [{ name = "HarrisonTCodes" }]
 requires-python = ">=3.12"
-license = {file = "LICENSE"}
-authors = [{name = "HarrisonTCodes"}]
+readme = "README.md"
+license = { file = "LICENSE" }
 dependencies = [
     "ursina (>=7.0.0,<8.0.0)",
     "biopython (>=1.85,<2.0)",
-    "scipy (>=1.15.2,<2.0.0)"
+    "scipy (>=1.15.2,<2.0.0)",
 ]
-
-[tool.poetry]
-packages = [{include = "ursina_proteins", from = "src"}]
-
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-isort = "^6.0.1"
-flake8 = "^7.2.0"
-pytest = "^8.3.5"
-pre-commit = "^4.2.0"
 
 [project.urls]
 Homepage = "https://github.com/HarrisonTCodes/ursina-proteins"
 Source = "https://github.com/HarrisonTCodes/ursina-proteins"
 
+[dependency-groups]
+dev = [
+    "black>=25.1.0,<26",
+    "isort>=6.0.1,<7",
+    "flake8>=7.2.0,<8",
+    "pytest>=8.3.5,<9",
+    "pre-commit>=4.2.0,<5",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/ursina_proteins"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/ursina_proteins"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/ursina_proteins" = "ursina_proteins"
+
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
