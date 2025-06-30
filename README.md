@@ -37,7 +37,7 @@ poetry run python src/demo.py
 ```
 
 ## Contributions
-Contributions are welcome. Please use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and enable pre-commit hooks.
+Contributions are welcome. Please enable pre-commit hooks to catch and fix formatting/linting issues before raising a PR.
 ```bash
 # Enable pre-commit hooks
 poetry run pre-commit install
