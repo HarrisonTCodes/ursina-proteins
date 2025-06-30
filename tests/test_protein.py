@@ -4,7 +4,6 @@ from ursina_proteins.protein import parse_segments
 
 
 class TestFillSegments(unittest.TestCase):
-
     def test_basic_usage(self):
         segments = [(5, 10), (14, 15)]
         size = 20

@@ -18,11 +18,9 @@ Source = "https://github.com/HarrisonTCodes/ursina-proteins"
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0,<26",
-    "isort>=6.0.1,<7",
-    "flake8>=7.2.0,<8",
     "pytest>=8.3.5,<9",
     "pre-commit>=4.2.0,<5",
+    "ruff>=0.12.1",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -33,6 +31,12 @@ include = ["src/ursina_proteins"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/ursina_proteins" = "ursina_proteins"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["I"]
 
 [build-system]
 requires = ["hatchling"]
