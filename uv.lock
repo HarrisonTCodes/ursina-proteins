@@ -458,7 +458,7 @@ wheels = [
 
 [[package]]
 name = "ursina-proteins"
-version = "1.2.0"
+version = "1.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "biopython" },
@@ -477,7 +477,7 @@ dev = [
 requires-dist = [
     { name = "biopython", specifier = ">=1.85,<2.0" },
     { name = "scipy", specifier = ">=1.15.2,<2.0.0" },
-    { name = "ursina", specifier = ">=8.0.0,<9.0.0" },
+    { name = "ursina", specifier = ">=7.0.0,<9.0.0" },
 ]
 
 [package.metadata.requires-dev]
