@@ -158,7 +158,7 @@ class Protein:
                     atom_triangles if atom_triangles else ICOSAHEDRON_FACES,
                     atom_normals if atom_normals else ICOSAHEDRON_NORMALS,
                 ),
-                origin=structure_center_of_mass,
+                origin=Vec3(*structure_center_of_mass),
                 *args,
                 **kwargs,
             )
@@ -169,13 +169,13 @@ class Protein:
         )
         self.helices_entity = Entity(
             model=chain_meshes[0],
-            origin=structure_center_of_mass,
+            origin=Vec3(*structure_center_of_mass),
             *args,
             **kwargs,
         )
         self.coils_entity = Entity(
             model=chain_meshes[1],
-            origin=structure_center_of_mass,
+            origin=Vec3(*structure_center_of_mass),
             *args,
             **kwargs,
         )
