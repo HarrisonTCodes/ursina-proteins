@@ -410,13 +410,25 @@ wheels = [
 
 [[package]]
 name = "screeninfo"
-version = "0.7"
+version = "0.8.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cython", marker = "sys_platform == 'darwin'" },
     { name = "pyobjc-framework-cocoa", marker = "sys_platform == 'darwin'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/dc/9015386eb0b75c500d540a4481863cb176abf7f852e4ddaf6484d323b145/screeninfo-0.7.tar.gz", hash = "sha256:12a97c3527e3544ac5dbd7c1204283e2653d655cbd15844c990a83b1b13ef500", size = 10623, upload-time = "2021-08-03T11:25:23.123Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/bb/e69e5e628d43f118e0af4fc063c20058faa8635c95a1296764acc8167e27/screeninfo-0.8.1.tar.gz", hash = "sha256:9983076bcc7e34402a1a9e4d7dabf3729411fd2abb3f3b4be7eba73519cd2ed1", size = 10666, upload-time = "2022-09-09T11:35:23.419Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/bf/c5205d480307bef660e56544b9e3d7ff687da776abb30c9cb3f330887570/screeninfo-0.8.1-py3-none-any.whl", hash = "sha256:e97d6b173856edcfa3bd282f81deb528188aff14b11ec3e195584e7641be733c", size = 12907, upload-time = "2022-09-09T11:35:21.351Z" },
+]
+
+[[package]]
+name = "sswg"
+version = "4.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/2c/824fa5e96385cd3325279b0198e526ac23c13ee011c574bc18ba8fe04d9e/sswg-4.3.0.tar.gz", hash = "sha256:dbc2b6282fd19070eeb2b302039c4eedf7afb4fbf5a0a20490e16bb7fd516f8a", size = 6641, upload-time = "2025-06-06T21:28:14.694Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/54/cda746af289bced80c69d30d31f378f36833164931646e373ec83f05c7d9/sswg-4.3.0-py3-none-any.whl", hash = "sha256:c4d0e559ab7ffd37e36d9a072861e12d93d57ae66564b93b87bc239f0c8b6283", size = 6862, upload-time = "2025-06-06T21:28:13.593Z" },
+]
 
 [[package]]
 name = "typing-extensions"
@@ -429,7 +441,7 @@ wheels = [
 
 [[package]]
 name = "ursina"
-version = "7.0.0"
+version = "8.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "panda3d" },
@@ -437,10 +449,11 @@ dependencies = [
     { name = "pillow" },
     { name = "pyperclip" },
     { name = "screeninfo" },
+    { name = "sswg" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ff/13/76ff76de0839c68e58a6a927438778b98c7ca7f38dce517e359a3721498e/ursina-7.0.0.tar.gz", hash = "sha256:838970dadcd4b40d77b4d5c80ab2c99fc869d2b455de75b733b0f1f74a8874d1", size = 3034282, upload-time = "2024-04-21T21:13:12.98Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/00/de067c5cef544bc2f8f6e869251b4522ef8cfb45e99915b90571851bd7c0/ursina-8.0.1.tar.gz", hash = "sha256:d44253d458887faa835ec0d83f28dce484ffb92574f631b11e876127d82219c6", size = 4259406, upload-time = "2025-07-10T16:33:14.745Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/79/f2d8d88adc8cfc86da15ab6ac8f9f4670d5367b6bf94642ffe0ebec4d963/ursina-7.0.0-py3-none-any.whl", hash = "sha256:f80a8ee84c299b835075d37780fd4607bd20cf85f9dacc59376d9535b51bb7c3", size = 3137991, upload-time = "2024-04-21T21:12:40.001Z" },
+    { url = "https://files.pythonhosted.org/packages/48/22/ff79ccdf31292000cbbe04bb2a1c408216d354901534baaaf12f75638109/ursina-8.0.1-py3-none-any.whl", hash = "sha256:8e33349dbfcd842d3165747c18426bddc61b70abf46945f5377362249f417fd2", size = 4387335, upload-time = "2025-07-10T16:33:34.027Z" },
 ]
 
 [[package]]
@@ -464,7 +477,7 @@ dev = [
 requires-dist = [
     { name = "biopython", specifier = ">=1.85,<2.0" },
     { name = "scipy", specifier = ">=1.15.2,<2.0.0" },
-    { name = "ursina", specifier = ">=7.0.0,<8.0.0" },
+    { name = "ursina", specifier = ">=8.0.0,<9.0.0" },
 ]
 
 [package.metadata.requires-dev]
