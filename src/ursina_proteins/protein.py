@@ -66,6 +66,9 @@ class Protein:
     Class Attributes:
         ELEMENT_COLORS: Default color mapping for chemical elements.
         CHAIN_COLORS: Default color mapping for protein chains.
+        PDB_CHAIN_ID_INDEX: Index of chain ID in PDB file line.
+        PDB_START_RESIDUE_INDICES: Indices of start-of-helix residue in PDB file line.
+        PDB_END_RESIDUE_INDICES: Indices of end-of-helix residue in PDB file line.
     """
 
     ELEMENT_COLORS = {
@@ -89,6 +92,10 @@ class Protein:
         "G": color.rgb(1, 0.6, 0),
         "H": color.rgb(1, 0, 1),
     }
+
+    PDB_CHAIN_ID_INDEX = 19
+    PDB_START_RESIDUE_INDICES = (21, 25)
+    PDB_END_RESIDUE_INDICES = (33, 37)
 
     def __init__(
         self,
@@ -368,9 +375,21 @@ class Protein:
         with open(pdb_filepath, "r") as pdb_file:
             for line in pdb_file:
                 if line.startswith("HELIX"):
-                    chain_id = line[19].strip()
-                    start_residue = int(line[21:25].strip())
-                    end_residue = int(line[33:37].strip())
+                    chain_id = line[Protein.PDB_CHAIN_ID_INDEX]
+                    start_residue = int(
+                        line[
+                            Protein.PDB_START_RESIDUE_INDICES[
+                                0
+                            ] : Protein.PDB_START_RESIDUE_INDICES[1]
+                        ].strip()
+                    )
+                    end_residue = int(
+                        line[
+                            Protein.PDB_END_RESIDUE_INDICES[
+                                0
+                            ] : Protein.PDB_END_RESIDUE_INDICES[1]
+                        ].strip()
+                    )
 
                     if chain_id in helices:
                         helices[chain_id].append((start_residue, end_residue))
