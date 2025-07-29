@@ -100,6 +100,7 @@ class Protein:
     def __init__(
         self,
         pdb_filepath: str,
+        pdb_parser_quiet: bool = True,
         compute_atoms: bool = True,
         atoms_size: float = 0.1,
         helices_thickness: float = 4,
@@ -118,6 +119,7 @@ class Protein:
 
         Args:
             pdb_filepath: Path to the PDB file.
+            pdb_parser_quiet: Flag to enable/disable logging on PDB parser (default: True).
             compute_atoms: Flag to enable/disable atoms computation (default: True).
             atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
             helices_thickness: Thickness of helix meshes (default: 4).
@@ -148,7 +150,7 @@ class Protein:
             raise ValueError("Smoothness value must be at least 1")
 
         # Parse structure
-        parser = PDBParser(QUIET=True)
+        parser = PDBParser(QUIET=pdb_parser_quiet)
         self.structure = parser.get_structure("protein", pdb_filepath)
         self.helices = self.get_helices(pdb_filepath)
         structure_center_of_mass = self.structure.center_of_mass()
