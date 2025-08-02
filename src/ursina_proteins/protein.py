@@ -168,12 +168,13 @@ class Protein:
             raise ValueError("Smoothness value must be at least 1")
 
         # Parse structure
-        parser = PDBParser() if protein_format == Format.PDB else MMCIFParser()
+        legacy = protein_format == Format.PDB
+        parser = PDBParser() if legacy else MMCIFParser()
         parser.QUIET = parser_quiet
         self.structure = parser.get_structure("protein", protein_filepath)
         self.helices = (
             self.get_pdb_helices(protein_filepath)
-            if protein_format == Format.PDB
+            if legacy
             else self.get_cif_helices(protein_filepath)
         )
         structure_center_of_mass = self.structure.center_of_mass()
