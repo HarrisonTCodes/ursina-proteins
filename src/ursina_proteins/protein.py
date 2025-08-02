@@ -164,7 +164,11 @@ class Protein:
         parser = PDBParser() if protein_format == Format.PDB else MMCIFParser()
         parser.QUIET = parser_quiet
         self.structure = parser.get_structure("protein", protein_filepath)
-        self.helices = self.get_pdb_helices(protein_filepath)
+        self.helices = (
+            self.get_pdb_helices(protein_filepath)
+            if protein_format == Format.PDB
+            else self.get_cif_helices(protein_filepath)
+        )
         structure_center_of_mass = self.structure.center_of_mass()
 
         # Create entities
@@ -405,6 +409,67 @@ class Protein:
                         ].strip()
                     )
 
+                    if chain_id in helices:
+                        helices[chain_id].append((start_residue, end_residue))
+                    else:
+                        helices[chain_id] = [(start_residue, end_residue)]
+
+        return helices
+
+    def get_cif_helices(self, protein_filepath: str) -> dict[str, list[tuple[int]]]:
+        """
+        Extract helix information for a protein from a CIF file.
+
+        This method parses the loops in a CIF file to identify the start and
+        end residues of helices for each chain.
+
+        Args:
+            protein_filepath: Path to the CIF file.
+
+        Returns:
+            A dictionary mapping chain IDs to lists of helices,
+            where each segment is represented as a tuple of start/end indices.
+        """
+
+        helices = dict()
+        current_loop_identifiers = []
+        helix_identifiers = [
+            "beg_label_asym_id",
+            "beg_label_seq_id",
+            "end_label_seq_id",
+        ]
+
+        with open(protein_filepath, "r") as cif_file:
+            for line in cif_file:
+                # Start of new loop
+                if line.startswith("_loop"):
+                    current_loop_identifiers = []
+
+                # Structure attribute
+                elif line.startswith("_struct_conf"):
+                    identifier = line.split(".")[1].strip()
+                    current_loop_identifiers.append(identifier)
+
+                # Data line
+                elif "HELX" in line:
+                    if not all(
+                        [
+                            identifier in current_loop_identifiers
+                            for identifier in helix_identifiers
+                        ]
+                    ):
+                        continue
+                    line_parts = line.split()
+                    try:
+                        chain_id, start_residue, end_residue = [
+                            line_parts[current_loop_identifiers.index(identifier)]
+                            for identifier in helix_identifiers
+                        ]
+                    except IndexError:
+                        continue
+
+                    start_residue = int(start_residue)
+                    end_residue = int(end_residue)
                     if chain_id in helices:
                         helices[chain_id].append((start_residue, end_residue))
                     else:
