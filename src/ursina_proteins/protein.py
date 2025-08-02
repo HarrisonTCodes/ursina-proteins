@@ -1,11 +1,20 @@
+from enum import Enum
 from hashlib import md5
 from math import sqrt
 from os import path
 
 import numpy as np
 from Bio.PDB import PDBParser
+from Bio.PDB.MMCIFParser import MMCIFParser
 from scipy.interpolate import make_splrep, splev
 from ursina import Color, Entity, Mesh, Vec3, color
+
+
+# Protein formats
+class Format(Enum):
+    PDB = "PDB"
+    CIF = "CIF"
+
 
 # Geometry constants
 PHI = (1 + sqrt(5)) / 2
@@ -100,6 +109,7 @@ class Protein:
     def __init__(
         self,
         protein_filepath: str,
+        protein_format: Format = Format.PDB,
         parser_quiet: bool = True,
         compute_atoms: bool = True,
         atoms_size: float = 0.1,
@@ -119,6 +129,7 @@ class Protein:
 
         Args:
             protein_filepath: Path to the protein file.
+            protein_format: Format of protein file (PDB or CIF) (default: PDB)
             parser_quiet: Flag to enable/disable logging on parser (default: True).
             compute_atoms: Flag to enable/disable atoms computation (default: True).
             atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
@@ -150,9 +161,10 @@ class Protein:
             raise ValueError("Smoothness value must be at least 1")
 
         # Parse structure
-        parser = PDBParser(QUIET=parser_quiet)
+        parser = PDBParser() if protein_format == Format.PDB else MMCIFParser()
+        parser.QUIET = parser_quiet
         self.structure = parser.get_structure("protein", protein_filepath)
-        self.helices = self.get_helices(protein_filepath)
+        self.helices = self.get_pdb_helices(protein_filepath)
         structure_center_of_mass = self.structure.center_of_mass()
 
         # Create entities
