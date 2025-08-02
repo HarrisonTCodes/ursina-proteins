@@ -78,6 +78,7 @@ class Protein:
         PDB_CHAIN_ID_INDEX: Index of chain ID in PDB file line.
         PDB_START_RESIDUE_INDICES: Indices of start-of-helix residue in PDB file line.
         PDB_END_RESIDUE_INDICES: Indices of end-of-helix residue in PDB file line.
+        CIF_HELIX_IDENTIFIERS: Structure identifiers for helix information in CIF file loops.
     """
 
     ELEMENT_COLORS = {
@@ -105,6 +106,12 @@ class Protein:
     PDB_CHAIN_ID_INDEX = 19
     PDB_START_RESIDUE_INDICES = (21, 25)
     PDB_END_RESIDUE_INDICES = (33, 37)
+
+    CIF_HELIX_IDENTIFIERS = [
+        "beg_label_asym_id",  # Chain ID
+        "beg_label_seq_id",  # Start residue index
+        "end_label_seq_id",  # End residue index
+    ]
 
     def __init__(
         self,
@@ -431,11 +438,6 @@ class Protein:
             where each segment is represented as a tuple of start/end indices.
         """
 
-        helix_identifier_names = [
-            "beg_label_asym_id",
-            "beg_label_seq_id",
-            "end_label_seq_id",
-        ]
         helices = dict()
 
         with open(protein_filepath, "r") as cif_file:
@@ -473,7 +475,7 @@ class Protein:
             try:
                 chain_id, start_residue, end_residue = [
                     line_parts[identifiers.index(identifier)]
-                    for identifier in helix_identifier_names
+                    for identifier in Protein.CIF_HELIX_IDENTIFIERS
                 ]
             # Non helix data line yet HELX found (informational line)
             except IndexError:
