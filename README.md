@@ -8,7 +8,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A Python package for rendering protein structures of PDB format in 3D using [Ursina](https://www.ursinaengine.org/), as featured in [Ursina's sample projects](https://www.ursinaengine.org/samples.html).
+A Python package for rendering protein structures in 3D using [Ursina](https://www.ursinaengine.org/), as featured in [Ursina's sample projects](https://www.ursinaengine.org/samples.html).
 
 ![Example proteins](./assets/example.png)
 
@@ -25,7 +25,8 @@ uv sync
 ```
 
 ## Usage
-You can use the library in an existing Ursina project by importing the `Protein` class and creating an instance from a PDB file. You can render any proteins in the PDB file format, and can find many available for download at the [RCSB Protein Data Bank](https://www.rcsb.org/).
+You can render proteins from files in the (default) PDB format, or the mmCIF/PDBx format (by passing `protein_format = "CIF"` in the `Protein` class constructor). Many protein files can be found at the [RCSB Protein Data Bank](https://www.rcsb.org/).
+You can use the library in an existing Ursina project by importing the `Protein` class and creating an instance from a protein file.
 ```python
 from ursina_proteins.protein import Protein
 
