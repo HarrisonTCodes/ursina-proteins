@@ -431,49 +431,60 @@ class Protein:
             where each segment is represented as a tuple of start/end indices.
         """
 
-        helices = dict()
-        current_loop_identifiers = []
-        helix_identifiers = [
+        helix_identifier_names = [
             "beg_label_asym_id",
             "beg_label_seq_id",
             "end_label_seq_id",
         ]
+        helices = dict()
 
         with open(protein_filepath, "r") as cif_file:
-            for line in cif_file:
-                # Start of new loop
-                if line.startswith("_loop"):
-                    current_loop_identifiers = []
+            lines = [line.strip() for line in cif_file if line.strip()]
 
-                # Structure attribute
-                elif line.startswith("_struct_conf"):
-                    identifier = line.split(".")[1].strip()
-                    current_loop_identifiers.append(identifier)
+        # Get first line of helix data
+        first_helix_line_index = next(
+            (i for i, line in enumerate(lines) if line.startswith("HELX"))
+        )
 
-                # Data line
-                elif "HELX" in line:
-                    if not all(
-                        [
-                            identifier in current_loop_identifiers
-                            for identifier in helix_identifiers
-                        ]
-                    ):
-                        continue
-                    line_parts = line.split()
-                    try:
-                        chain_id, start_residue, end_residue = [
-                            line_parts[current_loop_identifiers.index(identifier)]
-                            for identifier in helix_identifiers
-                        ]
-                    except IndexError:
-                        continue
+        # Get start of helix data loop
+        helix_loop_line_index = first_helix_line_index
+        for i in range(first_helix_line_index, 0, -1):
+            line = lines[i]
+            if line.startswith("loop_"):
+                helix_loop_line_index = i
+                break
 
-                    start_residue = int(start_residue)
-                    end_residue = int(end_residue)
-                    if chain_id in helices:
-                        helices[chain_id].append((start_residue, end_residue))
-                    else:
-                        helices[chain_id] = [(start_residue, end_residue)]
+        # Get identifiers order in loop
+        identifiers = []
+        for line in lines[helix_loop_line_index + 1 :]:
+            if not line.startswith("_struct_conf."):
+                break
+            identifier = line.split(".")[1]
+            identifiers.append(identifier)
+
+        # Get helices
+        for line in lines[helix_loop_line_index + 1 :]:
+            if line.startswith("loop_"):
+                break
+            if not "HELX" in line:
+                continue
+
+            line_parts = line.split()
+            try:
+                chain_id, start_residue, end_residue = [
+                    line_parts[identifiers.index(identifier)]
+                    for identifier in helix_identifier_names
+                ]
+            # Non helix data line yet HELX found (informational line)
+            except IndexError:
+                continue
+
+            start_residue = int(start_residue)
+            end_residue = int(end_residue)
+            if chain_id in helices:
+                helices[chain_id].append((start_residue, end_residue))
+            else:
+                helices[chain_id] = [(start_residue, end_residue)]
 
         return helices
 
