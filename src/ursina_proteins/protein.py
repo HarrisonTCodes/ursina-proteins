@@ -99,8 +99,8 @@ class Protein:
 
     def __init__(
         self,
-        pdb_filepath: str,
-        pdb_parser_quiet: bool = True,
+        protein_filepath: str,
+        parser_quiet: bool = True,
         compute_atoms: bool = True,
         atoms_size: float = 0.1,
         helices_thickness: float = 4,
@@ -115,11 +115,11 @@ class Protein:
         **kwargs,
     ):
         """
-        Initialize a Protein object from a PDB file.
+        Initialize a Protein object from a protein file.
 
         Args:
-            pdb_filepath: Path to the PDB file.
-            pdb_parser_quiet: Flag to enable/disable logging on PDB parser (default: True).
+            protein_filepath: Path to the protein file.
+            parser_quiet: Flag to enable/disable logging on parser (default: True).
             compute_atoms: Flag to enable/disable atoms computation (default: True).
             atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
             helices_thickness: Thickness of helix meshes (default: 4).
@@ -140,8 +140,8 @@ class Protein:
         if atom_element_color_map is None:
             atom_element_color_map = dict()
 
-        if not path.isfile(pdb_filepath):
-            raise FileNotFoundError(f"PDB file not found: {pdb_filepath}")
+        if not path.isfile(protein_filepath):
+            raise FileNotFoundError(f"Protein file not found: {protein_filepath}")
 
         if helices_thickness <= 0 or coils_thickness <= 0 or atoms_size <= 0:
             raise ValueError("Thickness and size values must be positive")
@@ -150,9 +150,9 @@ class Protein:
             raise ValueError("Smoothness value must be at least 1")
 
         # Parse structure
-        parser = PDBParser(QUIET=pdb_parser_quiet)
-        self.structure = parser.get_structure("protein", pdb_filepath)
-        self.helices = self.get_helices(pdb_filepath)
+        parser = PDBParser(QUIET=parser_quiet)
+        self.structure = parser.get_structure("protein", protein_filepath)
+        self.helices = self.get_helices(protein_filepath)
         structure_center_of_mass = self.structure.center_of_mass()
 
         # Create entities
@@ -357,7 +357,7 @@ class Protein:
             )
         ]
 
-    def get_helices(self, pdb_filepath: str) -> dict[str, list[tuple[int]]]:
+    def get_pdb_helices(self, protein_filepath: str) -> dict[str, list[tuple[int]]]:
         """
         Extract helix information for a protein from a PDB file.
 
@@ -365,7 +365,7 @@ class Protein:
         the start and end residues of helices for each chain.
 
         Args:
-            pdb_filepath: Path to the PDB file.
+            protein_filepath: Path to the PDB file.
 
         Returns:
             A dictionary mapping chain IDs to lists of helices,
@@ -374,7 +374,7 @@ class Protein:
 
         helices = dict()
 
-        with open(pdb_filepath, "r") as pdb_file:
+        with open(protein_filepath, "r") as pdb_file:
             for line in pdb_file:
                 if line.startswith("HELIX"):
                     chain_id = line[Protein.PDB_CHAIN_ID_INDEX]
