@@ -25,7 +25,7 @@ uv sync
 ```
 
 ## Usage
-You can render proteins from files in the (default) PDB format, or the mmCIF/PDBx format (by passing `protein_format = "CIF"` in the `Protein` class constructor). Many protein files can be found at the [RCSB Protein Data Bank](https://www.rcsb.org/).
+You can render proteins from files in the (default) PDB format, or the mmCIF/PDBx format (by passing `legacy_pdb = False` in the `Protein` class constructor). Many protein files can be found at the [RCSB Protein Data Bank](https://www.rcsb.org/).
 You can use the library in an existing Ursina project by importing the `Protein` class and creating an instance from a protein file.
 ```python
 from ursina_proteins.protein import Protein
