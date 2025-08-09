@@ -15,7 +15,6 @@ jobs:
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
 
-
   test:
     runs-on: ubuntu-latest
     steps:
@@ -24,3 +23,12 @@ jobs:
 
       - name: Run tests
         run: uv run pytest .
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Build package
+        run: uv build
