@@ -1,4 +1,4 @@
-name: pre-commit
+name: code-quality
 
 on: [push, pull_request]
 
@@ -14,3 +14,13 @@ jobs:
 
       - name: Run pre-commit hooks
         run: uv run pre-commit run --all-files
+
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Run tests
+        run: uv run pytest .
