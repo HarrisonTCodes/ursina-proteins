@@ -1,6 +1,7 @@
 import unittest
+from os import path
 
-from ursina_proteins.protein import parse_segments
+from ursina_proteins.protein import Protein, parse_segments
 
 
 class TestFillSegments(unittest.TestCase):
@@ -24,3 +25,9 @@ class TestFillSegments(unittest.TestCase):
         size = 12
         expected = {"a": [], "b": [(0, 12)]}
         self.assertEqual(parse_segments(segments, size, "a", "b"), expected)
+
+
+class TestProteinInit(unittest.TestCase):
+    def test_simple_pdb(self):
+        base_dir = path.dirname(__file__)
+        Protein(path.join(base_dir, "..", "assets", "insulin.pdb"))
