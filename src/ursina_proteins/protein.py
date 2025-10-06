@@ -70,7 +70,6 @@ class Protein:
         PDB_CHAIN_ID_INDEX: Index of chain ID in PDB file line.
         PDB_START_RESIDUE_INDICES: Indices of start-of-helix residue in PDB file line.
         PDB_END_RESIDUE_INDICES: Indices of end-of-helix residue in PDB file line.
-        CIF_HELIX_IDENTIFIERS: Structure identifiers for helix information in CIF file loops.
     """
 
     ELEMENT_COLORS = {
@@ -98,12 +97,6 @@ class Protein:
     PDB_CHAIN_ID_INDEX = 19
     PDB_START_RESIDUE_INDICES = (21, 25)
     PDB_END_RESIDUE_INDICES = (33, 37)
-
-    CIF_HELIX_IDENTIFIERS = [
-        "beg_label_asym_id",  # Chain ID
-        "beg_label_seq_id",  # Start residue index
-        "end_label_seq_id",  # End residue index
-    ]
 
     def __init__(
         self,
@@ -415,70 +408,67 @@ class Protein:
 
         return helices
 
-    def get_cif_helices(self, protein_filepath: str) -> dict[str, list[tuple[int]]]:
-        """
-        Extract helix information for a protein from a CIF file.
+    def get_cif_helices(
+        self, protein_filepath: str
+    ) -> dict[str, list[tuple[int, int]]]:
+        helices = {}
 
-        This method parses the loops in a CIF file to identify the start and
-        end residues of helices for each chain.
+        # Load CIF file into memory
+        with open(protein_filepath, "r") as file:
+            lines = [line.strip() for line in file if line.strip()]
 
-        Args:
-            protein_filepath: Path to the CIF file.
-
-        Returns:
-            A dictionary mapping chain IDs to lists of helices,
-            where each segment is represented as a tuple of start/end indices.
-        """
-
-        helices = dict()
-
-        with open(protein_filepath, "r") as cif_file:
-            lines = [line.strip() for line in cif_file if line.strip()]
-
-        # Get first line of helix data
-        first_helix_line_index = next(
-            (i for i, line in enumerate(lines) if line.startswith("HELX"))
-        )
-
-        # Get start of helix data loop
-        helix_loop_line_index = first_helix_line_index
-        for i in range(first_helix_line_index, 0, -1):
-            line = lines[i]
-            if line.startswith("loop_"):
-                helix_loop_line_index = i
+        loop_start = None
+        for i, line in enumerate(lines):
+            # Heuristically check loop is data block
+            if line.startswith("loop_") and any(
+                "_struct_conf." in line for line in lines[i + 1 : i + 10]
+            ):
+                loop_start = i
                 break
+        if loop_start is None:
+            return helices
 
-        # Get identifiers order in loop
         identifiers = []
-        for line in lines[helix_loop_line_index + 1 :]:
+        data_start = loop_start + 1
+        for j, line in enumerate(lines[data_start:], start=data_start):
+            # Get index where identifiers end and data begins
             if not line.startswith("_struct_conf."):
+                data_start = j
                 break
-            identifier = line.split(".")[1]
-            identifiers.append(identifier)
+            # Get identifiers in order they appear in line
+            identifiers.append(line.split(".")[1])
 
-        # Get helices
-        for line in lines[helix_loop_line_index + 1 :]:
+        # Create identifier-index map for more readable/semantic access and confirm key identifiers are present
+        identifier_index_map = {
+            identifier: k for k, identifier in enumerate(identifiers)
+        }
+        if (
+            not {
+                "conf_type_id",
+                "beg_auth_asym_id",
+                "beg_auth_seq_id",
+                "end_auth_seq_id",
+            }
+            <= identifier_index_map.keys()
+        ):
+            return helices
+
+        for line in lines[data_start:]:
+            # End processing when next loop reached
             if line.startswith("loop_"):
                 break
-            if not "HELX" in line:
+
+            parts = line.split()
+            # Skip irrelevant lines
+            if len(parts) < len(identifiers):
+                continue
+            if "HELX" not in parts[identifier_index_map["conf_type_id"]]:
                 continue
 
-            line_parts = line.split()
-            try:
-                chain_id, start_residue, end_residue = [
-                    line_parts[identifiers.index(identifier)]
-                    for identifier in Protein.CIF_HELIX_IDENTIFIERS
-                ]
-            # Non helix data line yet HELX found (informational line)
-            except IndexError:
-                continue
-
-            start_residue = int(start_residue)
-            end_residue = int(end_residue)
-            if chain_id in helices:
-                helices[chain_id].append((start_residue, end_residue))
-            else:
-                helices[chain_id] = [(start_residue, end_residue)]
+            chain_id = parts[identifier_index_map["beg_auth_asym_id"]]
+            start = int(parts[identifier_index_map["beg_auth_seq_id"]])
+            end = int(parts[identifier_index_map["end_auth_seq_id"]])
+            helices.setdefault(chain_id, []).append((start, end))
 
         return helices
 
