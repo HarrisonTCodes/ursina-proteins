@@ -298,8 +298,9 @@ class Protein:
 
             # Chain info
             chain_id = chain.get_id()
+            chain_helices = self.helices.get(chain_id) or []
             chain_segments = parse_segments(
-                self.helices[chain_id], len(carbon_alpha_coords), "helices", "coils"
+                chain_helices, len(carbon_alpha_coords), "helices", "coils"
             )
 
             # Render each segment (helices and coils)
