@@ -73,7 +73,7 @@ class ChainsEntity(Entity):
             chain_id = chain.get_id()
             chain_helices = helices.get(chain_id) or []
             chain_segments = self.parse_segments(
-                chain_helices, len(carbon_alpha_coords), "helices", "coils"
+                chain_helices, len(carbon_alpha_coords)
             )
 
             # Render each segment (helices and coils)
@@ -167,8 +167,6 @@ class ChainsEntity(Entity):
     def parse_segments(
         segments: list[tuple[int]],
         size: int,
-        in_segment_label: str,
-        out_segment_label: str,
     ) -> dict[str, list[tuple[int]]]:
         """
         Parse a list of segments and fill in the gaps between them.
@@ -179,25 +177,23 @@ class ChainsEntity(Entity):
         Args:
             segments: List of segments, each represented as a tuple of (start, end) indices.
             size: The total size to cover.
-            in_segment_label: Label for the input segments.
-            out_segment_label: Label for the gaps between input segments.
 
         Returns:
-            A dictionary with two keys (in_segment_label and out_segment_label),
+            A dictionary with two keys ("helices" and "coils"),
             each mapping to a list of (start, end) tuples representing the segments.
         """
 
         segments = sorted(segments)
-        result = {in_segment_label: [], out_segment_label: []}
+        result = {"helices": [], "coils": []}
         current = 0
 
         for start, end in segments:
             if current < start:
-                result[out_segment_label].append((current, start))
-            result[in_segment_label].append((start, end))
+                result["coils"].append((current, start))
+            result["helices"].append((start, end))
             current = end
 
         if current <= size:
-            result[out_segment_label].append((current, size))
+            result["coils"].append((current, size))
 
         return result
