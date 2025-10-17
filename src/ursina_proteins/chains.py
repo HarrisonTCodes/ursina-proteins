@@ -38,7 +38,7 @@ class ChainsEntity(Entity):
         **kwargs,
     ):
         """
-        Create an entity to visualise helices and a subentity to visualise coils of chains
+        Create an entity to visualise helices and a subentity to visualise coils of chains.
 
         Args:
             chains: Chains to visualise.

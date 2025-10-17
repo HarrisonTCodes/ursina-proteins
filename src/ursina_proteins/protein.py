@@ -48,7 +48,7 @@ class Protein:
         **kwargs,
     ):
         """
-        Parse a protein structure file and create visualisation entities
+        Parse a protein structure file and create visualisation entities.
 
         Args:
             protein_filepath: Path to the protein file.
@@ -57,13 +57,13 @@ class Protein:
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
             helices_thickness: Thickness of helix meshes (default: 4).
             coils_thickness: Thickness of coil meshes (default: 1).
-            chain_id_color_map: Color mapping for chains (default: None).
+            chain_id_color_map: Color mapping for chain IDs (default: None).
             compute_atoms: Flag to enable/disable atoms computation (default: True).
             atom_size: Size of individual atoms in the atoms mesh (default: 0.1).
             atom_vertices: Base vertices to use for atom geometry (default: None).
             atom_triangles: Base triangles to use for atom geometry (default: None).
             atom_normals: Base normals to use for atom geometry (default: None).
-            atom_element_color_map: Color mapping for atoms (default: None).
+            atom_element_color_map: Color mapping for atom elements (default: None).
             *args: Arguments passed to constructor for each entity.
             **kwargs: Keyword arguments passed to constructor for each entity.
         """

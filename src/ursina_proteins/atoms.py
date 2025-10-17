@@ -75,15 +75,15 @@ class AtomsEntity(Entity):
         **kwargs,
     ):
         """
-        Create an entity to visualise atoms
+        Create an entity to visualise atoms.
 
         Args:
             atoms: Atoms to visualise.
-            atom_size: Size of individual atoms in the atoms mesh.
+            atom_size: Size of individual atoms.
             atom_vertices: Base vertices to use for atom geometry (default: None).
             atom_triangles: Base triangles to use for atom geometry (default: None).
             atom_normals: Base normals to use for atom geometry (default: None).
-            element_color_map: Color mapping for atoms (default: None).
+            element_color_map: Color mapping for atom elements (default: None).
             *args: Arguments passed to constructor for the entity.
             **kwargs: Keyword arguments passed to constructor for the entity.
         """
