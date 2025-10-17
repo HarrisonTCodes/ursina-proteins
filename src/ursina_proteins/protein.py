@@ -1,5 +1,4 @@
 from hashlib import md5
-from math import sqrt
 from os import path
 
 import numpy as np
@@ -8,48 +7,7 @@ from Bio.PDB.MMCIFParser import MMCIFParser
 from scipy.interpolate import make_splrep, splev
 from ursina import Color, Entity, Mesh, Vec3, color
 
-# Geometry constants
-PHI = (1 + sqrt(5)) / 2
-
-ICOSAHEDRON_VERTS = [
-    Vec3(-1, PHI, 0),
-    Vec3(1, PHI, 0),
-    Vec3(-1, -PHI, 0),
-    Vec3(1, -PHI, 0),
-    Vec3(0, -1, PHI),
-    Vec3(0, 1, PHI),
-    Vec3(0, -1, -PHI),
-    Vec3(0, 1, -PHI),
-    Vec3(PHI, 0, -1),
-    Vec3(PHI, 0, 1),
-    Vec3(-PHI, 0, -1),
-    Vec3(-PHI, 0, 1),
-]
-
-ICOSAHEDRON_FACES = [
-    (0, 11, 5),
-    (0, 5, 1),
-    (0, 1, 7),
-    (0, 7, 10),
-    (0, 10, 11),
-    (1, 5, 9),
-    (5, 11, 4),
-    (11, 10, 2),
-    (10, 7, 6),
-    (7, 1, 8),
-    (3, 9, 4),
-    (3, 4, 2),
-    (3, 2, 6),
-    (3, 6, 8),
-    (3, 8, 9),
-    (4, 9, 5),
-    (2, 4, 11),
-    (6, 2, 10),
-    (8, 6, 7),
-    (9, 8, 1),
-]
-
-ICOSAHEDRON_NORMALS = [v.normalized() for v in ICOSAHEDRON_VERTS]
+from ursina_proteins.atoms import AtomsEntity
 
 
 class Protein:
@@ -65,23 +23,11 @@ class Protein:
         entities: List of all structural entities (atoms, helices, coils).
 
     Class Attributes:
-        ELEMENT_COLORS: Default color mapping for chemical elements.
         CHAIN_COLORS: Default color mapping for protein chains.
         PDB_CHAIN_ID_INDEX: Index of chain ID in PDB file line.
         PDB_START_RESIDUE_INDICES: Indices of start-of-helix residue in PDB file line.
         PDB_END_RESIDUE_INDICES: Indices of end-of-helix residue in PDB file line.
     """
-
-    ELEMENT_COLORS = {
-        "H": color.rgb(0.8, 0.8, 0.8),
-        "C": color.rgb(0.2, 0.2, 0.2),
-        "N": color.rgb(0, 0, 0.8),
-        "O": color.rgb(0.8, 0, 0),
-        "S": color.rgb(0.8, 0.8, 0),
-        "P": color.rgb(1, 0.65, 0),
-        "Cl": color.rgb(0, 0.8, 0),
-        "Fe": color.rgb(0.7, 0.45, 0.2),
-    }
 
     CHAIN_COLORS = {
         "A": color.rgb(1, 0, 0),
@@ -103,36 +49,36 @@ class Protein:
         protein_filepath: str,
         legacy_pdb: bool = True,
         parser_quiet: bool = True,
-        compute_atoms: bool = True,
-        atoms_size: float = 0.1,
         helices_thickness: float = 4,
         coils_thickness: float = 1,
         chains_smoothness: float = 3,
         chain_id_color_map: dict[str, Color] = None,
-        atom_element_color_map: dict[str, Color] = None,
+        compute_atoms: bool = True,
+        atom_size: float = 0.1,
         atom_vertices: list[Vec3] = None,
         atom_triangles: list[tuple[int]] = None,
         atom_normals: list[Vec3] = None,
+        atom_element_color_map: dict[str, Color] = None,
         *args,
         **kwargs,
     ):
         """
-        Initialize a Protein object from a protein file.
+        Parse a protein structure file and create visualisation entities
 
         Args:
             protein_filepath: Path to the protein file.
             legacy_pdb: Whether protein is in legacy PDB (or newer mmCIF) format (default: True).
             parser_quiet: Flag to enable/disable logging on parser (default: True).
-            compute_atoms: Flag to enable/disable atoms computation (default: True).
-            atoms_size: Size of individual atoms in the atoms mesh (default: 0.1).
             helices_thickness: Thickness of helix meshes (default: 4).
             coils_thickness: Thickness of coil meshes (default: 1).
             chains_smoothness: Smoothness factor for chain rendering (default: 3).
             chain_id_color_map: Color mapping for chains (default: None).
-            atom_element_color_map: Color mapping for atoms (default: None).
+            compute_atoms: Flag to enable/disable atoms computation (default: True).
+            atom_size: Size of individual atoms in the atoms mesh (default: 0.1).
             atom_vertices: Base vertices to use for atom geometry (default: None).
             atom_triangles: Base triangles to use for atom geometry (default: None).
             atom_normals: Base normals to use for atom geometry (default: None).
+            atom_element_color_map: Color mapping for atoms (default: None).
             *args: Arguments passed to constructor for each entity.
             **kwargs: Keyword arguments passed to constructor for each entity.
         """
@@ -146,8 +92,8 @@ class Protein:
         if not path.isfile(protein_filepath):
             raise FileNotFoundError(f"Protein file not found: {protein_filepath}")
 
-        if helices_thickness <= 0 or coils_thickness <= 0 or atoms_size <= 0:
-            raise ValueError("Thickness and size values must be positive")
+        if helices_thickness <= 0 or coils_thickness <= 0:
+            raise ValueError("Thickness values must be positive")
 
         if chains_smoothness < 1:
             raise ValueError("Smoothness value must be at least 1")
@@ -167,14 +113,13 @@ class Protein:
         self.entities = []
 
         if compute_atoms:
-            self.atoms_entity = Entity(
-                model=self.compute_atoms_mesh(
-                    atoms_size,
-                    atom_element_color_map,
-                    atom_vertices if atom_vertices else ICOSAHEDRON_VERTS,
-                    atom_triangles if atom_triangles else ICOSAHEDRON_FACES,
-                    atom_normals if atom_normals else ICOSAHEDRON_NORMALS,
-                ),
+            self.atoms_entity = AtomsEntity(
+                self.structure.get_atoms(),
+                atom_size,
+                atom_vertices,
+                atom_triangles,
+                atom_normals,
+                atom_element_color_map,
                 origin=Vec3(*structure_center_of_mass),
                 *args,
                 **kwargs,
@@ -197,68 +142,6 @@ class Protein:
             **kwargs,
         )
         self.entities.extend([self.helices_entity, self.coils_entity])
-
-    def compute_atoms_mesh(
-        self,
-        atoms_size: float,
-        element_color_map: dict[str, Color],
-        base_vertices: list[Vec3],
-        base_triangles: list[tuple[int]],
-        base_normals: list[Vec3],
-    ) -> Mesh:
-        """
-        Compute the mesh of atoms in the protein structure.
-
-        This method creates an icosahedron for each atom in the protein structure
-        and assigns colors based on the element type, combining them into one mesh.
-
-        Args:
-            atoms_size: Size of individual atoms.
-            element_color_map: Color mapping for atom elements.
-            base_vertices: Base vertices to use for atom geometry
-            base_triangles: Base triangles to use for atom geometry
-            base_normals: Base normals to use for atom geometry
-
-        Returns:
-            A Mesh object representing all atoms in the protein structure.
-        """
-
-        verts = []
-        faces = []
-        colors = []
-        norms = []
-
-        for index, atom in enumerate(self.structure.get_atoms()):
-            # Vertices
-            verts.extend(
-                [(vert * atoms_size) + atom.get_coord() for vert in base_vertices]
-            )
-
-            # Faces (triangles)
-            faces.extend(
-                [
-                    tuple(i + len(base_vertices) * index for i in face)
-                    for face in base_triangles
-                ]
-            )
-
-            # Colors
-            colors.extend(
-                [
-                    element_color_map.get(
-                        atom.element,
-                        Protein.ELEMENT_COLORS.get(
-                            atom.element, color.rgb(1, 0.7, 0.8)
-                        ),
-                    )
-                    for _ in base_vertices
-                ]
-            )
-
-            # Normals
-            norms.extend(base_normals)
-
-        return Mesh(vertices=verts, triangles=faces, colors=colors, normals=norms)
 
     def compute_helices_and_coils_meshes(
         self,
