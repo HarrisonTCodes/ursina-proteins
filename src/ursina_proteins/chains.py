@@ -33,7 +33,7 @@ class ChainsEntity(Entity):
         smoothness: float,
         helices_thickness: float,
         coils_thickness: float,
-        id_color_map: dict[str, Color],
+        id_color_map: dict[str, Color] = None,
         *args,
         **kwargs,
     ):
@@ -46,7 +46,7 @@ class ChainsEntity(Entity):
             smoothness: Factor controlling the smoothness of the chains.
             helices_thickness: Thickness of helix meshes.
             coils_thickness: Thickness of coil meshes.
-            id_color_map: Color mapping for chain IDs.
+            id_color_map: Color mapping for chain IDs (default: None).
             *args: Arguments passed to constructor for the entities.
             **kwargs: Keyword arguments passed to constructor for the entities.
         """
@@ -56,6 +56,8 @@ class ChainsEntity(Entity):
 
         if smoothness < 1:
             raise ValueError("Smoothness value must be at least 1")
+
+        id_color_map = id_color_map or dict()
 
         verts = {"helices": [], "coils": []}
         tris = {"helices": [], "coils": []}

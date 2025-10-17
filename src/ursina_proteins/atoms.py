@@ -66,7 +66,7 @@ class AtomsEntity(Entity):
     def __init__(
         self,
         atoms: Iterator[Atom],
-        atom_size: float = 0.1,
+        atom_size: float,
         atom_vertices: list[Vec3] = None,
         atom_triangles: list[tuple[int]] = None,
         atom_normals: list[Vec3] = None,
@@ -79,7 +79,7 @@ class AtomsEntity(Entity):
 
         Args:
             atoms: Atoms to visualise.
-            atom_size: Size of individual atoms in the atoms mesh (default: 0.1).
+            atom_size: Size of individual atoms in the atoms mesh.
             atom_vertices: Base vertices to use for atom geometry (default: None).
             atom_triangles: Base triangles to use for atom geometry (default: None).
             atom_normals: Base normals to use for atom geometry (default: None).
@@ -93,6 +93,7 @@ class AtomsEntity(Entity):
         atom_vertices = atom_vertices or ICOSAHEDRON_VERTS
         atom_triangles = atom_triangles or ICOSAHEDRON_FACES
         atom_normals = atom_normals or ICOSAHEDRON_NORMALS
+        element_color_map = element_color_map or dict()
 
         verts = []
         faces = []

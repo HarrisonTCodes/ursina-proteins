@@ -68,12 +68,6 @@ class Protein:
             **kwargs: Keyword arguments passed to constructor for each entity.
         """
 
-        # Validation
-        if chain_id_color_map is None:
-            chain_id_color_map = dict()
-        if atom_element_color_map is None:
-            atom_element_color_map = dict()
-
         if not path.isfile(protein_filepath):
             raise FileNotFoundError(f"Protein file not found: {protein_filepath}")
 
