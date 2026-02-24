@@ -70,6 +70,9 @@ class ChainsEntity(Entity):
                 for atom in chain.get_atoms()
                 if atom.get_id() == "CA"
             }
+            # Skip chains without any carbon alpha atoms
+            if not carbon_alpha_coords:
+                continue
 
             # Chain info
             chain_id = chain.get_id()
